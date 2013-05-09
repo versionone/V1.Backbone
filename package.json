@@ -11,10 +11,16 @@
 	],
 
 	"dependencies": {
-		"mocha": "*"
+		"mocha": "*",
+		"coffee-script": "*",
+		"chai": "*",
+		"backbone": "*",
+		"underscore": "*",
+		"sinon": "*",
+		"Deferred": "*"
 	},
 
 	"scripts": {
-		"test": "mocha tests"
+		"test": "mocha --compilers coffee:coffee-script tests"
 	}
 }
