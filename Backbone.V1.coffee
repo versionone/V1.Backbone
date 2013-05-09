@@ -67,8 +67,8 @@ class V1.JsonQuery
           transformedRow[item.alias] = row[item.attribute]
         if(item instanceof Relation)
           children = aliasRows(row[item.attribute], item.type)
-          transformedRow[item.attribute] = new item.type(children[0]) if item.isSingle()
-          transformedRow[item.attribute] = new item.type(children) if item.isMulti()
+          transformedRow[item.alias] = new item.type(children[0]) if item.isSingle()
+          transformedRow[item.alias] = new item.type(children) if item.isMulti()
 
       transformedRow
 
@@ -87,6 +87,11 @@ class V1.JsonQuery
   class Relation
     constructor: (@attribute) ->
       @type = V1.Collection
+      @alias = @attribute
+
+    as: (alias) ->
+      @alias = alias
+      this
 
     isMulti: ->
       @type.prototype instanceof V1.Collection or @type is V1.Collection
@@ -94,7 +99,7 @@ class V1.JsonQuery
     isSingle: ->
       @type.prototype instanceof V1.Model or @type is V1.Model
 
-    as: (type) ->
+    of: (type) ->
       throw "Unsupported type must be a V1.Model or a V1.Collection" unless type.prototype instanceof V1.Model or type.prototype instanceof V1.Collection
       @type = type
       this

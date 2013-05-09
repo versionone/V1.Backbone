@@ -92,7 +92,7 @@ describe 'V1.JsonQuery', ->
         Expressions = V1.Collection.extend
           model: V1.Model.extend
             assetType: "Expression"
-            schema: [ relation("Author").as(Author) ]
+            schema: [ relation("Author").of(Author) ]
 
         query = expectedQuery "{\"from\":\"Expression\",\"select\":[{\"from\":\"Author as Member\",\"select\":[\"Name\"]}]}"
 
@@ -112,7 +112,7 @@ describe 'V1.JsonQuery', ->
         Expressions = V1.Collection.extend
           model: V1.Model.extend
             assetType: "Expression"
-            schema: [ relation("ExpressionsInConversation").as(Replies) ]
+            schema: [ relation("ExpressionsInConversation").of(Replies) ]
 
         query = expectedQuery "{\"from\":\"Expression\",\"select\":[{\"from\":\"ExpressionsInConversation as Expression\",\"select\":[\"Content\"]}]}"
 
@@ -160,7 +160,7 @@ describe 'V1.JsonQuery', ->
       Expressions = V1.Collection.extend
         model: V1.Model.extend
           assetType: "Expression"
-          schema: [ JsonQuery.relation("Author").as(Member) ]
+          schema: [ JsonQuery.relation("Author").of(Member) ]
 
       query = new JsonQuery(url:"url", fetcher: recorded)
       query.for(Expressions)

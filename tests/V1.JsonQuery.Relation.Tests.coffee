@@ -15,13 +15,19 @@ describe "An attribute alias", ->
 
   it "should be able to change the alias name", ->
     model = V1.Model.extend()
-    testRelation = relation("test").as(model)
+    testRelation = relation("test").of(model)
     expect(testRelation.type).to.equal(model)
     expect(testRelation.isSingle()).to.be.true
     expect(testRelation.isMulti()).to.be.false
 
   it "should not be able to set it something crazy", ->
     model = ->
-    expect( -> relation("test").as(model) ).to.throw(/unsupported/i)
+    expect( -> relation("test").of(model) ).to.throw(/unsupported/i)
+
+  it "should use the same name as the alias", ->
+    expect(relation("test").alias).to.equal("test")
+
+  it "should be able to change the alias name", ->
+    expect(relation("test").as("somethingelse").alias).to.equal("somethingelse")
 
 
