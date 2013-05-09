@@ -208,6 +208,8 @@ describe 'V1.JsonQuery', ->
       query.for(Expressions)
       query.exec().done (results) ->
         expect(results.length).to.equal(1)
-        expect(results[0].length).to.equal(41)
-        expect(results[0].at(1).get("Replies")).to.be.an.instanceof(V1.Collection)
-        expect(results[0].at(1).get("Replies").at(0).get("Author").get("WhoDat")).to.equal("Administrator")
+
+        expressions = results[0]
+        expect(expressions.length).to.equal(41)
+        expect(expressions.at(1).get("Replies")).to.be.an.instanceof(V1.Collection)
+        expect(expressions.at(1).get("Replies").at(0).get("Author").get("WhoDat")).to.equal("Administrator")
