@@ -1,0 +1,20 @@
+{
+	"name": "Backbone.V1",
+	"version": "0.0.1",
+	"description": "a simple backbone adapter for V1 queries",
+
+	"contributors": [
+		{
+			"name": "James Holmes",
+			"email": "james.holmes@versionone.com"
+		}
+	],
+
+	"dependencies": {
+		"mocha": "*"
+	},
+
+	"scripts": {
+		"test": "mocha tests"
+	}
+}
