@@ -99,4 +99,25 @@ describe 'V1.JsonQuery', ->
         query.for(Expressions)
         query.exec()
 
+      it 'can generate a query with a mutlirelation', ->
+
+        relation = JsonQuery.relation
+
+        Replies = V1.Collection.extend
+          model: V1.Model.extend
+            assetType: "Expression"
+            schema: ["Content"]
+
+        Expressions = V1.Collection.extend
+          model: V1.Model.extend
+            assetType: "Expression"
+            schema: [ relation("ExpressionsInConversation").as(Replies) ]
+
+        query = expectedQuery "{\"from\":\"Expression\",\"select\":[{\"from\":\"ExpressionsInConversation as Expression\",\"select\":[\"Content\"]}]}"
+
+        query = new JsonQuery(url:"url", fetcher: query)
+        query.for(Expressions)
+        query.exec()
+
+
 

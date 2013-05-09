@@ -58,12 +58,17 @@ class V1.JsonQuery
 
   class Relation
     constructor: (@attribute) ->
-      @type = V1.Model
+      @type = V1.Collection
+
+    isMulti: ->
+      @type.prototype instanceof V1.Collection or @type is V1.Collection
+
+    isSingle: ->
+      @type.prototype instanceof V1.Model or @type is V1.Model
 
     as: (type) ->
-      throw "Unsupported type must be a V1.BackboneAsset" unless type.prototype instanceof V1.Model
+      throw "Unsupported type must be a V1.Model or a V1.Collection" unless type.prototype instanceof V1.Model or type.prototype instanceof V1.Collection
       @type = type
       this
 
   @relation = (attribute) -> new Relation(attribute)
-
