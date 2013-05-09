@@ -15,8 +15,9 @@ class V1.JsonQuery
     }
 
   getSelectTokens = (schema) ->
-    _(schema).values()
-
+    _(schema).map (item) ->
+      return item.attribute if item instanceof Alias
+      return item if _.isString(item)
 
   constructor: (options) ->
     throw "url required" unless options?.url?
@@ -36,3 +37,17 @@ class V1.JsonQuery
       .join("\n---\n");
 
     @options.fetcher(@options.url, data)
+
+
+  ### Relation Helpers ###
+
+  class Alias
+    constructor: (@attribute) ->
+      @alias = @attribute
+
+    as: (alias) ->
+      @alias = alias
+      this
+
+  @alias = (attribute) -> new Alias(attribute)
+

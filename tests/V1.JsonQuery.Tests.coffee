@@ -1,8 +1,6 @@
 JsonQuery = require('../Backbone.V1').JsonQuery
 expect = require('chai').expect
 Backbone = require('backbone')
-sinon = require('sinon')
-
 deferred = require('Deferred')
 
 mockAjax = (results) ->
@@ -32,20 +30,41 @@ describe 'V1.JsonQuery', ->
 
   describe 'converting a backbone model to a query', ->
 
-    it 'generate a simple query', ->
-      Member = Backbone.Model.extend(
-        assetType: "Member"
-        schema:
-          "Name": "Name"
-      )
-      Members = Backbone.Model.extend(model:Member)
+    describe 'a single query', ->
 
-      results = []
+      it 'generate a simple query', ->
+        Member = Backbone.Model.extend
+          assetType: "Member"
+          schema: ["Name"]
 
-      queryChecker = (url, data) ->
-        expect(data).to.equal '{"from":"Member","select":["Name"]}'
+        Members = Backbone.Model.extend(model:Member)
+
+        results = []
+
+        queryChecker = (url, data) ->
+          expect(data).to.equal '{"from":"Member","select":["Name"]}'
 
 
-      query = new JsonQuery(url:"url", fetcher: queryChecker)
-      query.for(Members)
-      query.exec()
+        query = new JsonQuery(url:"url", fetcher: queryChecker)
+        query.for(Members)
+        query.exec()
+
+      it 'query with an alias', ->
+
+        alias = JsonQuery.alias
+
+        Expression = Backbone.Model.extend
+          assetType: "Expression"
+          schema: [ alias("Author.Name").as("Speaker") ]
+
+        Expressions = Backbone.Model.extend(model:Expression)
+
+        results = []
+
+        queryChecker = (url, data) ->
+          expect(data).to.equal '{"from":"Expression","select":["Author.Name"]}'
+
+
+        query = new JsonQuery(url:"url", fetcher: queryChecker)
+        query.for(Expressions)
+        query.exec()
