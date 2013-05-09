@@ -41,7 +41,51 @@ class V1.JsonQuery
       .map((q) -> JSON.stringify(q))
       .join("\n---\n");
 
-    @options.fetcher(@options.url, data)
+    @options.fetcher(@options.url, data).pipe(_.bind(transformResults, @types))
+
+  transformResults = (data) ->
+    _(data).map(transformRows, this)
+
+  transformRows = (rows, index) ->
+    type = this[index]
+    new type(aliasRows(rows, type))
+
+  aliasRows = (rows, type) ->
+
+    schema = if type.prototype instanceof V1.Model
+    then type.prototype.schema
+    else type.prototype.model.prototype.schema
+#
+#    console.log(schema)
+
+    _(rows).map (row) ->
+      transformedRow = { "_oid": row["_oid"] }
+      _(schema).each (item) ->
+        if(_.isString(item))
+          transformedRow[item] = row[item]
+        if(item instanceof Alias)
+          transformedRow[item.alias] = row[item.attribute]
+        if(item instanceof Relation)
+          children = aliasRows(row[item.attribute], item.type)
+          transformedRow[item.attribute] = new item.type(children[0]) if item.isSingle()
+          transformedRow[item.attribute] = new item.type(children) if item.isMulti()
+
+      transformedRow
+#
+#    _(rows).each (row) -> _(schema).each (as, column) ->
+
+      #  if(_.isFunction(as)) {
+      #    if(as.prototype instanceof Backbone.Model)
+      #      row[column] = new as(row[column][0])
+      #    else if (as.prototype instanceof Backbone.Collection)
+      #      row[column] = new as(row[column])
+      #    else
+      #      throw "Unknown Model or Collection type"
+      #  } else if(as != column) {
+      #    row[as] = row[column]
+      #    delete row[column]
+      #  }
+
 
 
   ### Relation Helpers ###

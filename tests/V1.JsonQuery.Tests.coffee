@@ -4,10 +4,9 @@ JsonQuery = V1.JsonQuery
 
 expect = require('chai').expect
 Backbone = require('backbone')
-deferred = require('Deferred')
+recorded = require('./recorded')
 
-mockAjax = (results) ->
-  -> deferred().resolve(results)
+deferred = require('Deferred')
 
 describe 'V1.JsonQuery', ->
 
@@ -28,6 +27,7 @@ describe 'V1.JsonQuery', ->
 
       fetcher = (url) ->
         expect(url).to.equal(actualUrl)
+        deferred()
 
       query = new JsonQuery(url:actualUrl, fetcher: fetcher)
       query.exec()
@@ -37,6 +37,7 @@ describe 'V1.JsonQuery', ->
     expectedQuery = (expected) ->
        (url, data) ->
           expect(data).to.equal(expected)
+          deferred()
 
     describe 'basic schema', ->
 
@@ -47,9 +48,9 @@ describe 'V1.JsonQuery', ->
             assetType: "Member"
             schema: ["Name"]
 
-        query = expectedQuery '{"from":"Member","select":["Name"]}'
+        ajax = expectedQuery '{"from":"Member","select":["Name"]}'
 
-        query = new JsonQuery(url:"url", fetcher: query)
+        query = new JsonQuery(url:"url", fetcher: ajax)
         query.for(Members)
         query.exec()
 
@@ -61,9 +62,9 @@ describe 'V1.JsonQuery', ->
             assetType: "Expression"
             schema: [ alias("Author.Name").as("Speaker") ]
 
-        query = expectedQuery '{"from":"Expression","select":["Author.Name"]}'
+        ajax = expectedQuery '{"from":"Expression","select":["Author.Name"]}'
 
-        query = new JsonQuery(url:"url", fetcher: query)
+        query = new JsonQuery(url:"url", fetcher: ajax)
         query.for(Expressions)
         query.exec()
 
@@ -120,4 +121,50 @@ describe 'V1.JsonQuery', ->
         query.exec()
 
 
+  describe "getting results", ->
 
+    it 'can get results for a simple query', ->
+
+      Members = V1.Collection.extend
+        model: V1.Model.extend
+          assetType: "Member"
+          schema: ["Name"]
+
+      query = new JsonQuery(url:"url", fetcher: recorded)
+      query.for(Members)
+      query.exec().done (results) ->
+        expect(results.length).to.equal(1)
+        expect(results[0].length).to.equal(5)
+        expect(results[0].at(0).get("Name")).to.equal("Administrator")
+
+    it 'can get results with an alias', ->
+
+      Members = V1.Collection.extend
+        model: V1.Model.extend
+          assetType: "Member"
+          schema: [JsonQuery.alias("Name").as("Who")]
+
+      query = new JsonQuery(url:"url", fetcher: recorded)
+      query.for(Members)
+      query.exec().done (results) ->
+        expect(results.length).to.equal(1)
+        expect(results[0].length).to.equal(5)
+        expect(results[0].at(0).get("Who")).to.equal("Administrator")
+
+    it 'can get hydrate results for a relation', ->
+
+      Member = V1.Model.extend
+        assetType: "Member"
+        schema: ["Name"]
+
+      Expressions = V1.Collection.extend
+        model: V1.Model.extend
+          assetType: "Expression"
+          schema: [ JsonQuery.relation("Author").as(Member) ]
+
+      query = new JsonQuery(url:"url", fetcher: recorded)
+      query.for(Expressions)
+      query.exec().done (results) ->
+        expect(results.length).to.equal(1)
+        expect(results[0].length).to.equal(41)
+        expect(results[0].at(0).get("Author").get("Name")).to.equal("Administrator")
