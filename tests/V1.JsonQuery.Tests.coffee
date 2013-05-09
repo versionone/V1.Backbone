@@ -30,41 +30,35 @@ describe 'V1.JsonQuery', ->
 
   describe 'converting a backbone model to a query', ->
 
+    expectedQuery = (expected) ->
+       (url, data) ->
+          expect(data).to.equal(expected)
+
     describe 'a single query', ->
 
       it 'generate a simple query', ->
-        Member = Backbone.Model.extend
-          assetType: "Member"
-          schema: ["Name"]
 
-        Members = Backbone.Model.extend(model:Member)
+        Members = Backbone.Model.extend
+          model: Backbone.Model.extend
+            assetType: "Member"
+            schema: ["Name"]
 
-        results = []
+        query = expectedQuery '{"from":"Member","select":["Name"]}'
 
-        queryChecker = (url, data) ->
-          expect(data).to.equal '{"from":"Member","select":["Name"]}'
-
-
-        query = new JsonQuery(url:"url", fetcher: queryChecker)
+        query = new JsonQuery(url:"url", fetcher: query)
         query.for(Members)
         query.exec()
 
       it 'query with an alias', ->
-
         alias = JsonQuery.alias
 
-        Expression = Backbone.Model.extend
-          assetType: "Expression"
-          schema: [ alias("Author.Name").as("Speaker") ]
+        Expressions = Backbone.Model.extend
+          model: Backbone.Model.extend
+            assetType: "Expression"
+            schema: [ alias("Author.Name").as("Speaker") ]
 
-        Expressions = Backbone.Model.extend(model:Expression)
+        query = expectedQuery '{"from":"Expression","select":["Author.Name"]}'
 
-        results = []
-
-        queryChecker = (url, data) ->
-          expect(data).to.equal '{"from":"Expression","select":["Author.Name"]}'
-
-
-        query = new JsonQuery(url:"url", fetcher: queryChecker)
+        query = new JsonQuery(url:"url", fetcher: query)
         query.for(Expressions)
         query.exec()
