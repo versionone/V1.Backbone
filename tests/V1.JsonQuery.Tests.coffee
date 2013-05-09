@@ -1,4 +1,7 @@
-JsonQuery = require('../Backbone.V1').JsonQuery
+V1 = require('../Backbone.V1')
+
+JsonQuery = V1.JsonQuery
+
 expect = require('chai').expect
 Backbone = require('backbone')
 deferred = require('Deferred')
@@ -19,6 +22,7 @@ describe 'V1.JsonQuery', ->
       expect(createWithoutUrl).not.to.throw(/url required/)
 
   describe 'executing a query', ->
+
     it 'should make a request to the correct url', ->
       actualUrl = "/VersionOne.Web/query.legacy.v1"
 
@@ -34,12 +38,12 @@ describe 'V1.JsonQuery', ->
        (url, data) ->
           expect(data).to.equal(expected)
 
-    describe 'a single query', ->
+    describe 'basic schema', ->
 
-      it 'generate a simple query', ->
+      it 'can generate very simple query', ->
 
-        Members = Backbone.Model.extend
-          model: Backbone.Model.extend
+        Members = V1.Collection.extend
+          model: V1.Model.extend
             assetType: "Member"
             schema: ["Name"]
 
@@ -49,11 +53,11 @@ describe 'V1.JsonQuery', ->
         query.for(Members)
         query.exec()
 
-      it 'query with an alias', ->
+      it 'can query with an alias', ->
         alias = JsonQuery.alias
 
-        Expressions = Backbone.Model.extend
-          model: Backbone.Model.extend
+        Expressions = V1.Collection.extend
+          model: V1.Model.extend
             assetType: "Expression"
             schema: [ alias("Author.Name").as("Speaker") ]
 
@@ -62,3 +66,37 @@ describe 'V1.JsonQuery', ->
         query = new JsonQuery(url:"url", fetcher: query)
         query.for(Expressions)
         query.exec()
+
+      it 'can generate a query with multiple attributes', ->
+
+        Expressions = V1.Collection.extend
+          model: V1.Model.extend
+            assetType: "Expression"
+            schema: ["Author.Name", "Content"]
+
+        query = expectedQuery '{"from":"Expression","select":["Author.Name","Content"]}'
+
+        query = new JsonQuery(url:"url", fetcher: query)
+        query.for(Expressions)
+        query.exec()
+
+      it 'can generate a query with a relation', ->
+
+        relation = JsonQuery.relation
+
+        Author = V1.Model.extend
+          assetType: "Member"
+          schema: ["Name"]
+
+        Expressions = V1.Collection.extend
+          model: V1.Model.extend
+            assetType: "Expression"
+            schema: [ relation("Author").as(Author) ]
+
+        query = expectedQuery "{\"from\":\"Expression\",\"select\":[{\"from\":\"Author as Member\",\"select\":[\"Name\"]}]}"
+
+        query = new JsonQuery(url:"url", fetcher: query)
+        query.for(Expressions)
+        query.exec()
+
+
