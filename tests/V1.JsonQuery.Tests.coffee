@@ -1,4 +1,4 @@
-JsonQuery = require('../V1.JsonQuery').JsonQuery
+JsonQuery = require('../Backbone.V1').JsonQuery
 expect = require('chai').expect
 Backbone = require('backbone')
 sinon = require('sinon')

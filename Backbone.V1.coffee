@@ -1,5 +1,4 @@
 V1 = if exports? then exports else (V1 || {})
-
 _ = require('underscore') if !_? and require?
 Backbone = require('Backbone') if !Backbone? and require?
 
