@@ -168,3 +168,46 @@ describe 'V1.JsonQuery', ->
         expect(results.length).to.equal(1)
         expect(results[0].length).to.equal(41)
         expect(results[0].at(0).get("Author").get("Name")).to.equal("Administrator")
+
+    it 'can support deep aliasing', ->
+
+      Member = V1.Model.extend
+        assetType: "Member"
+        schema: [ JsonQuery.alias("Name").as("WhoDat") ]
+
+      Expressions = V1.Collection.extend
+        model: V1.Model.extend
+          assetType: "Expression"
+          schema: [ JsonQuery.relation("Author").of(Member) ]
+
+      query = new JsonQuery(url:"url", fetcher: recorded)
+      query.for(Expressions)
+      query.exec().done (results) ->
+        expect(results.length).to.equal(1)
+        expect(results[0].length).to.equal(41)
+        expect(results[0].at(0).get("Author").get("WhoDat")).to.equal("Administrator")
+
+    it 'can support deep relations', ->
+
+      Member = V1.Model.extend
+        assetType: "Member"
+        schema: [ JsonQuery.alias("Name").as("WhoDat") ]
+
+      Reply = V1.Collection.extend
+        model: V1.Model.extend
+          assetType: "Expression"
+          schema: [ JsonQuery.relation("Author").of(Member) ]
+
+
+      Expressions = V1.Collection.extend
+        model: V1.Model.extend
+          assetType: "Expression"
+          schema: [ JsonQuery.relation("ExpressionsInConversation").of(Reply).as("Replies") ]
+
+      query = new JsonQuery(url:"url", fetcher: recorded)
+      query.for(Expressions)
+      query.exec().done (results) ->
+        expect(results.length).to.equal(1)
+        expect(results[0].length).to.equal(41)
+        expect(results[0].at(1).get("Replies")).to.be.an.instanceof(V1.Collection)
+        expect(results[0].at(1).get("Replies").at(0).get("Author").get("WhoDat")).to.equal("Administrator")
