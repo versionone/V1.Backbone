@@ -71,22 +71,6 @@ class V1.JsonQuery
           transformedRow[item.attribute] = new item.type(children) if item.isMulti()
 
       transformedRow
-#
-#    _(rows).each (row) -> _(schema).each (as, column) ->
-
-      #  if(_.isFunction(as)) {
-      #    if(as.prototype instanceof Backbone.Model)
-      #      row[column] = new as(row[column][0])
-      #    else if (as.prototype instanceof Backbone.Collection)
-      #      row[column] = new as(row[column])
-      #    else
-      #      throw "Unknown Model or Collection type"
-      #  } else if(as != column) {
-      #    row[as] = row[column]
-      #    delete row[column]
-      #  }
-
-
 
   ### Relation Helpers ###
 
