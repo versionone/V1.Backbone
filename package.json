@@ -21,6 +21,6 @@
 	},
 
 	"scripts": {
-		"test": "mocha --compilers coffee:coffee-script tests"
+		"test": "mocha --compilers coffee:coffee-script --check-leaks -R spec tests"
 	}
 }
