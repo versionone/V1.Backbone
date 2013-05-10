@@ -2,7 +2,7 @@ V1 = require('../V1.Backbone')
 relation = V1.Backbone.relation
 expect = require('chai').expect
 
-describe "An attribute alias", ->
+describe "An attribute relation", ->
 
   it "should hold on to the attribute", ->
     expect(relation("test").attribute).to.equal("test")
@@ -29,5 +29,18 @@ describe "An attribute alias", ->
 
   it "should be able to change the alias name", ->
     expect(relation("test").as("somethingelse").alias).to.equal("somethingelse")
+
+  it "should be immutable", ->
+    testReltion = relation("test")
+
+    asAbc = testReltion.as("abc").of(V1.Backbone.Collection)
+    asXyz = testReltion.as("xyz").of(V1.Backbone.Model)
+
+    expect(testReltion.alias).to.equal("test")
+    expect(asAbc.alias).to.equal("abc")
+    expect(asXyz.alias).to.equal("xyz")
+
+    expect(asAbc.type).to.equal(V1.Backbone.Collection)
+    expect(asXyz.type).to.equal(V1.Backbone.Model)
 
 

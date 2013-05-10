@@ -122,17 +122,29 @@ class V1.Backbone.JsonQuery
 
 ### Relation Helpers ###
 
+aug = (target, props) ->
+  Dup = ->
+  Dup.prototype = target
+  dup = new Dup
+  _.extend(dup, props)
+
 class Alias
   constructor: (@attribute) ->
     @alias = @attribute
 
   as: (alias) ->
-    @alias = alias
-    this
+    aug(this, {alias})
 
 V1.Backbone.alias = (attribute) -> new Alias(attribute)
 
 class Relation extends Alias
+
+  isAcceptable = (type) ->
+    type.prototype instanceof V1.Backbone.Model or
+    type.prototype instanceof V1.Backbone.Collection or
+    type is V1.Backbone.Collection or
+    type is V1.Backbone.Model
+
   constructor: (@attribute) ->
     super(@attribute)
     @type = V1.Backbone.Collection
@@ -144,8 +156,7 @@ class Relation extends Alias
     @type.prototype instanceof V1.Backbone.Model or @type is V1.Backbone.Model
 
   of: (type) ->
-    throw "Unsupported type must be a V1.Backbone.Model or a V1.Backbone.Collection" unless type.prototype instanceof V1.Backbone.Model or type.prototype instanceof V1.Backbone.Collection
-    @type = type
-    this
+    throw "Unsupported type must be a V1.Backbone.Model or a V1.Backbone.Collection" unless isAcceptable(type)
+    aug(this, {type})
 
 V1.Backbone.relation = (attribute) -> new Relation(attribute)
