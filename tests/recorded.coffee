@@ -987,3 +987,14 @@ register 'url', '{"from":"Expression","select":[{"from":"ExpressionsInConversati
   ]
 ]
 '''
+
+register 'url', '{"from":"Member","select":["Name"],"where":{"ID":"Member:1017"}}', '''
+[
+  [
+    {
+      "_oid": "Member:1017",
+      "Name": "Bob McBobertan"
+    }
+  ]
+]
+'''

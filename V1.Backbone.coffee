@@ -1,14 +1,35 @@
-V1 = if exports? then exports else (V1 || {})
+V1 = if exports? then exports else (window.V1 ||= {})
 _ = require('underscore') if !_? and require?
 Backbone = require('Backbone') if !Backbone? and require?
 
-V1.Backbone = {}
+defaultQuerier = undefined
+
+V1.Backbone =
+  setDefaultInstance: (options) ->
+    defaultQuerier = new V1.Backbone.JsonQuery(options)
+
+  clearDefaultInstance: -> defaultQuerier = undefined
+
+sync = (method, model, options) ->
+  throw "Unsupported method: #{method}" unless method is "read"
+
+  querier = this.querier or defaultQuerier
+  throw "A querier is required" unless querier?
+
+  querier.into(model, options)
+    .done(options.success).fail(options.error)
+
 
 class V1.Backbone.Model extends Backbone.Model
+  idAttribute: "_oid"
+  sync: sync
+
 class V1.Backbone.Collection extends Backbone.Collection
+  sync: sync
+
 
 class V1.Backbone.JsonQuery
-  defaultOptions = { fetcher: (url, data) -> $.post(url, data) }
+  defaultOptions = { fetch: (url, data) -> $.post(url, data) }
 
   getQueryFor = (type, attribute) ->
     protoModel = if type.prototype instanceof V1.Backbone.Collection then type.prototype.model.prototype else type.prototype
@@ -38,15 +59,35 @@ class V1.Backbone.JsonQuery
     @types.push(type)
     @queries.push(getQueryFor(type))
 
+  into: (instance) ->
+    type = instance.constructor
+    query = getQueryFor(type)
+
+    if (instance instanceof V1.Backbone.Model)
+      throw "`id` is required" unless instance.id
+      (query.where || query.where = {}).ID = instance.id
+
+    data = JSON.stringify(query)
+
+    @options.fetch(@options.url, data)
+      .pipe(_.bind(prepareResultFor, type))
+
   exec: ->
     data = _(this.queries)
       .map((q) -> JSON.stringify(q))
       .join("\n---\n");
 
-    @options.fetcher(@options.url, data).pipe(_.bind(transformResults, @types))
+    @options.fetch(@options.url, data)
+      .pipe(_.bind(transformResults, @types))
 
   transformResults = (data) ->
     _(data).map(transformRows, this)
+
+  prepareResultFor = (data) ->
+    aliasRows(data[0], this)
+    return data[0] if this.prototype instanceof V1.Backbone.Collection
+    return data[0][0] if this.prototype instanceof V1.Backbone.Model
+    throw "wat"
 
   transformRows = (rows, index) ->
     type = this[index]
