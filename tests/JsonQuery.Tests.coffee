@@ -146,7 +146,6 @@ describe 'V1.JsonQuery', ->
         query.for(Members)
         query.exec()
 
-
   describe "getting results", ->
 
     it 'can get results for a simple query', ->
