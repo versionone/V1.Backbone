@@ -1,5 +1,5 @@
-V1 = require('../V1.Backbone').Backbone
-relation = V1.JsonQuery.relation
+V1 = require('../V1.Backbone')
+relation = V1.Backbone.relation
 expect = require('chai').expect
 
 describe "An attribute alias", ->
@@ -9,12 +9,12 @@ describe "An attribute alias", ->
 
   it "the type should be a generic `V1.Collection` by default", ->
     testRelation = relation("test")
-    expect(testRelation.type).to.equal(V1.Collection)
+    expect(testRelation.type).to.equal(V1.Backbone.Collection)
     expect(testRelation.isSingle()).to.be.false
     expect(testRelation.isMulti()).to.be.true
 
   it "should be able to change the alias name", ->
-    model = V1.Model.extend()
+    model = V1.Backbone.Model.extend()
     testRelation = relation("test").of(model)
     expect(testRelation.type).to.equal(model)
     expect(testRelation.isSingle()).to.be.true

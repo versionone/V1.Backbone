@@ -1013,3 +1013,206 @@ register 'url', '{"from":"Member","select":["Name"],"filter":["ParticipatesInCon
   ]
 ]
 '''
+
+register 'url', '{"from":"Member","select":["Name"],"where":{"Scopes.@Count":2}}', '''
+[
+  [
+    {
+      "_oid": "Member:20",
+      "Name": "Administrator"
+    }
+  ]
+]
+'''
+
+register 'url', '{"from":"Member","select":["Name","ParticipatesInConversations.@Count",{"from":"ParticipatesInConversations as Expression","select":["Content"]}]}', '''
+[
+  [
+    {
+      "_oid": "Member:20",
+      "Name": "Administrator",
+      "ParticipatesInConversations.@Count": "31",
+      "ParticipatesInConversations": [
+        {
+          "_oid": "Expression:1008",
+          "Content": "garbage!"
+        },
+        {
+          "_oid": "Expression:1011",
+          "Content": "test meats"
+        },
+        {
+          "_oid": "Expression:1013",
+          "Content": "trash!"
+        },
+        {
+          "_oid": "Expression:1015",
+          "Content": "conversation"
+        },
+        {
+          "_oid": "Expression:1020",
+          "Content": "hey people?!"
+        },
+        {
+          "_oid": "Expression:1023",
+          "Content": "moar"
+        },
+        {
+          "_oid": "Expression:1024",
+          "Content": "moar!!!"
+        },
+        {
+          "_oid": "Expression:1025",
+          "Content": "MOAR?!?!?!"
+        },
+        {
+          "_oid": "Expression:1026",
+          "Content": "what?!"
+        },
+        {
+          "_oid": "Expression:1027",
+          "Content": "maor?!"
+        },
+        {
+          "_oid": "Expression:1028",
+          "Content": "moar?!"
+        },
+        {
+          "_oid": "Expression:1029",
+          "Content": "evan MOAR?!"
+        },
+        {
+          "_oid": "Expression:1030",
+          "Content": "moars?!"
+        },
+        {
+          "_oid": "Expression:1032",
+          "Content": "here in test space"
+        },
+        {
+          "_oid": "Expression:1033",
+          "Content": "Talking about test in a space"
+        },
+        {
+          "_oid": "Expression:1036",
+          "Content": "10"
+        },
+        {
+          "_oid": "Expression:1037",
+          "Content": "9"
+        },
+        {
+          "_oid": "Expression:1038",
+          "Content": "8"
+        },
+        {
+          "_oid": "Expression:1039",
+          "Content": "7"
+        },
+        {
+          "_oid": "Expression:1040",
+          "Content": "6"
+        },
+        {
+          "_oid": "Expression:1041",
+          "Content": "5"
+        },
+        {
+          "_oid": "Expression:1042",
+          "Content": "4"
+        },
+        {
+          "_oid": "Expression:1043",
+          "Content": "3"
+        },
+        {
+          "_oid": "Expression:1044",
+          "Content": "2"
+        },
+        {
+          "_oid": "Expression:1045",
+          "Content": "1"
+        },
+        {
+          "_oid": "Expression:1050",
+          "Content": "hi"
+        },
+        {
+          "_oid": "Expression:1051",
+          "Content": "1"
+        },
+        {
+          "_oid": "Expression:1052",
+          "Content": "2"
+        },
+        {
+          "_oid": "Expression:1053",
+          "Content": "3"
+        },
+        {
+          "_oid": "Expression:1054",
+          "Content": "4"
+        },
+        {
+          "_oid": "Expression:1067",
+          "Content": "Space-ing it up!"
+        }
+      ]
+    },
+    {
+      "_oid": "Member:1017",
+      "Name": "Bob McBobertan",
+      "ParticipatesInConversations.@Count": "2",
+      "ParticipatesInConversations": [
+        {
+          "_oid": "Expression:1019",
+          "Content": "Herro, anyone?"
+        },
+        {
+          "_oid": "Expression:1020",
+          "Content": "hey people?!"
+        }
+      ]
+    },
+    {
+      "_oid": "Member:1047",
+      "Name": "Ian B",
+      "ParticipatesInConversations.@Count": "0",
+      "ParticipatesInConversations": []
+    },
+    {
+      "_oid": "Member:1048",
+      "Name": "Ian Culling",
+      "ParticipatesInConversations.@Count": "0",
+      "ParticipatesInConversations": []
+    },
+    {
+      "_oid": "Member:1049",
+      "Name": "Matt Higgins",
+      "ParticipatesInConversations.@Count": "5",
+      "ParticipatesInConversations": [
+        {
+          "_oid": "Expression:1050",
+          "Content": "hi"
+        },
+        {
+          "_oid": "Expression:1051",
+          "Content": "1"
+        },
+        {
+          "_oid": "Expression:1052",
+          "Content": "2"
+        },
+        {
+          "_oid": "Expression:1053",
+          "Content": "3"
+        },
+        {
+          "_oid": "Expression:1054",
+          "Content": "4"
+        }
+      ]
+    }
+  ]
+]
+'''

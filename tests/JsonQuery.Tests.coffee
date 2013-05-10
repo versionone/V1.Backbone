@@ -55,7 +55,7 @@ describe 'V1.JsonQuery', ->
         query.exec()
 
       it 'can query with an alias', ->
-        alias = JsonQuery.alias
+        alias = V1.alias
 
         Expressions = V1.Collection.extend
           model: V1.Model.extend
@@ -83,7 +83,7 @@ describe 'V1.JsonQuery', ->
 
       it 'can generate a query with a relation', ->
 
-        relation = JsonQuery.relation
+        relation = V1.relation
 
         Author = V1.Model.extend
           assetType: "Member"
@@ -102,7 +102,7 @@ describe 'V1.JsonQuery', ->
 
       it 'can generate a query with a mutlirelation', ->
 
-        relation = JsonQuery.relation
+        relation = V1.relation
 
         Replies = V1.Collection.extend
           model: V1.Model.extend
@@ -142,7 +142,7 @@ describe 'V1.JsonQuery', ->
       Members = V1.Collection.extend
         model: V1.Model.extend
           assetType: "Member"
-          schema: [JsonQuery.alias("Name").as("Who")]
+          schema: [V1.alias("Name").as("Who")]
 
       query = new JsonQuery(url:"url", fetch: recorded)
       query.for(Members)
@@ -160,7 +160,7 @@ describe 'V1.JsonQuery', ->
       Expressions = V1.Collection.extend
         model: V1.Model.extend
           assetType: "Expression"
-          schema: [ JsonQuery.relation("Author").of(Member) ]
+          schema: [ V1.relation("Author").of(Member) ]
 
       query = new JsonQuery(url:"url", fetch: recorded)
       query.for(Expressions)
@@ -173,12 +173,12 @@ describe 'V1.JsonQuery', ->
 
       Member = V1.Model.extend
         assetType: "Member"
-        schema: [ JsonQuery.alias("Name").as("WhoDat") ]
+        schema: [ V1.alias("Name").as("WhoDat") ]
 
       Expressions = V1.Collection.extend
         model: V1.Model.extend
           assetType: "Expression"
-          schema: [ JsonQuery.relation("Author").of(Member) ]
+          schema: [ V1.relation("Author").of(Member) ]
 
       query = new JsonQuery(url:"url", fetch: recorded)
       query.for(Expressions)
@@ -191,18 +191,18 @@ describe 'V1.JsonQuery', ->
 
       Member = V1.Model.extend
         assetType: "Member"
-        schema: [ JsonQuery.alias("Name").as("WhoDat") ]
+        schema: [ V1.alias("Name").as("WhoDat") ]
 
       Reply = V1.Collection.extend
         model: V1.Model.extend
           assetType: "Expression"
-          schema: [ JsonQuery.relation("Author").of(Member) ]
+          schema: [ V1.relation("Author").of(Member) ]
 
 
       Expressions = V1.Collection.extend
         model: V1.Model.extend
           assetType: "Expression"
-          schema: [ JsonQuery.relation("ExpressionsInConversation").of(Reply).as("Replies") ]
+          schema: [ V1.relation("ExpressionsInConversation").of(Reply).as("Replies") ]
 
       query = new JsonQuery(url:"url", fetch: recorded)
       query.for(Expressions)

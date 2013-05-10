@@ -31,7 +31,7 @@ class V1.Backbone.Collection extends Backbone.Collection
 class V1.Backbone.JsonQuery
   defaultOptions = { fetch: (url, data) -> $.post(url, data) }
 
-  validQueryOptions = ["filter"]
+  validQueryOptions = ["filter", "where"]
 
   getQueryFor = (type, attribute) ->
     protoModel = if type.prototype instanceof V1.Backbone.Collection then type.prototype.model.prototype else type.prototype
@@ -44,6 +44,8 @@ class V1.Backbone.JsonQuery
     }
 
   getSelectTokens = (schema) ->
+    return [schema] if _.isString(schema)
+
     _(schema).map (item) ->
       return getQueryFor(item.type, item.attribute) if item instanceof Relation
       return item.attribute if item instanceof Alias
@@ -88,10 +90,9 @@ class V1.Backbone.JsonQuery
     _(data).map(transformRows, this)
 
   prepareResultFor = (data) ->
-    aliasRows(data[0], this)
-    return data[0] if this.prototype instanceof V1.Backbone.Collection
-    return data[0][0] if this.prototype instanceof V1.Backbone.Model
-    throw "wat"
+    rows = aliasRows(data[0], this)
+    return rows if this.prototype instanceof V1.Backbone.Collection
+    return rows[0] if this.prototype instanceof V1.Backbone.Model
 
   transformRows = (rows, index) ->
     type = this[index]
@@ -101,6 +102,8 @@ class V1.Backbone.JsonQuery
     schema = if type.prototype instanceof V1.Backbone.Model
     then type.prototype.schema
     else type.prototype.model.prototype.schema
+
+    schema = [schema] if _.isString(schema)
 
     _(rows).map (row) ->
       transformedRow = { "_oid": row["_oid"] }
@@ -115,35 +118,34 @@ class V1.Backbone.JsonQuery
           else
             transformedRow[item.alias] = row[item.attribute]
 
-
       transformedRow
 
-  ### Relation Helpers ###
+### Relation Helpers ###
 
-  class Alias
-    constructor: (@attribute) ->
-      @alias = @attribute
+class Alias
+  constructor: (@attribute) ->
+    @alias = @attribute
 
-    as: (alias) ->
-      @alias = alias
-      this
+  as: (alias) ->
+    @alias = alias
+    this
 
-  @alias = (attribute) -> new Alias(attribute)
+V1.Backbone.alias = (attribute) -> new Alias(attribute)
 
-  class Relation extends Alias
-    constructor: (@attribute) ->
-      super(@attribute)
-      @type = V1.Backbone.Collection
+class Relation extends Alias
+  constructor: (@attribute) ->
+    super(@attribute)
+    @type = V1.Backbone.Collection
 
-    isMulti: ->
-      @type.prototype instanceof V1.Backbone.Collection or @type is V1.Backbone.Collection
+  isMulti: ->
+    @type.prototype instanceof V1.Backbone.Collection or @type is V1.Backbone.Collection
 
-    isSingle: ->
-      @type.prototype instanceof V1.Backbone.Model or @type is V1.Backbone.Model
+  isSingle: ->
+    @type.prototype instanceof V1.Backbone.Model or @type is V1.Backbone.Model
 
-    of: (type) ->
-      throw "Unsupported type must be a V1.Backbone.Model or a V1.Backbone.Collection" unless type.prototype instanceof V1.Backbone.Model or type.prototype instanceof V1.Backbone.Collection
-      @type = type
-      this
+  of: (type) ->
+    throw "Unsupported type must be a V1.Backbone.Model or a V1.Backbone.Collection" unless type.prototype instanceof V1.Backbone.Model or type.prototype instanceof V1.Backbone.Collection
+    @type = type
+    this
 
-  @relation = (attribute) -> new Relation(attribute)
+V1.Backbone.relation = (attribute) -> new Relation(attribute)
