@@ -20,8 +20,8 @@ class V1.JsonQuery
 
   getSelectTokens = (schema) ->
     _(schema).map (item) ->
-      return item.attribute if item instanceof Alias
       return getQueryFor(item.type, item.attribute) if item instanceof Relation
+      return item.attribute if item instanceof Alias
       return item if _.isString(item)
 
   constructor: (options) ->
@@ -63,12 +63,14 @@ class V1.JsonQuery
       _(schema).each (item) ->
         if(_.isString(item))
           transformedRow[item] = row[item]
-        if(item instanceof Alias)
-          transformedRow[item.alias] = row[item.attribute]
-        if(item instanceof Relation)
-          children = aliasRows(row[item.attribute], item.type)
-          transformedRow[item.alias] = new item.type(children[0]) if item.isSingle()
-          transformedRow[item.alias] = new item.type(children) if item.isMulti()
+        else if(item instanceof Alias)
+          if(item instanceof Relation)
+            children = aliasRows(row[item.attribute], item.type)
+            transformedRow[item.alias] = new item.type(children[0]) if item.isSingle() && children[0]?
+            transformedRow[item.alias] = new item.type(children) if item.isMulti()
+          else
+            transformedRow[item.alias] = row[item.attribute]
+
 
       transformedRow
 
@@ -84,14 +86,10 @@ class V1.JsonQuery
 
   @alias = (attribute) -> new Alias(attribute)
 
-  class Relation
+  class Relation extends Alias
     constructor: (@attribute) ->
+      super(@attribute)
       @type = V1.Collection
-      @alias = @attribute
-
-    as: (alias) ->
-      @alias = alias
-      this
 
     isMulti: ->
       @type.prototype instanceof V1.Collection or @type is V1.Collection
