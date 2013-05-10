@@ -1,4 +1,4 @@
-V1 = require('../Backbone.V1')
+V1 = require('../V1.Backbone').Backbone
 relation = V1.JsonQuery.relation
 expect = require('chai').expect
 

@@ -1,4 +1,4 @@
-alias = require('../Backbone.V1').JsonQuery.alias
+alias = require('../V1.Backbone').Backbone.JsonQuery.alias
 expect = require('chai').expect
 
 describe "An attribute alias", ->

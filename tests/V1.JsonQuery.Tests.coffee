@@ -1,4 +1,4 @@
-V1 = require('../Backbone.V1')
+V1 = require('../V1.Backbone').Backbone
 
 JsonQuery = V1.JsonQuery
 

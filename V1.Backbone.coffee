@@ -2,14 +2,16 @@ V1 = if exports? then exports else (V1 || {})
 _ = require('underscore') if !_? and require?
 Backbone = require('Backbone') if !Backbone? and require?
 
-class V1.Model extends Backbone.Model
-class V1.Collection extends Backbone.Collection
+V1.Backbone = {}
 
-class V1.JsonQuery
+class V1.Backbone.Model extends Backbone.Model
+class V1.Backbone.Collection extends Backbone.Collection
+
+class V1.Backbone.JsonQuery
   defaultOptions = { fetcher: (url, data) -> $.post(url, data) }
 
   getQueryFor = (type, attribute) ->
-    protoModel = if type.prototype instanceof V1.Collection then type.prototype.model.prototype else type.prototype
+    protoModel = if type.prototype instanceof V1.Backbone.Collection then type.prototype.model.prototype else type.prototype
 
     assetType = protoModel.assetType
 
@@ -51,12 +53,9 @@ class V1.JsonQuery
     new type(aliasRows(rows, type))
 
   aliasRows = (rows, type) ->
-
-    schema = if type.prototype instanceof V1.Model
+    schema = if type.prototype instanceof V1.Backbone.Model
     then type.prototype.schema
     else type.prototype.model.prototype.schema
-#
-#    console.log(schema)
 
     _(rows).map (row) ->
       transformedRow = { "_oid": row["_oid"] }
@@ -89,16 +88,16 @@ class V1.JsonQuery
   class Relation extends Alias
     constructor: (@attribute) ->
       super(@attribute)
-      @type = V1.Collection
+      @type = V1.Backbone.Collection
 
     isMulti: ->
-      @type.prototype instanceof V1.Collection or @type is V1.Collection
+      @type.prototype instanceof V1.Backbone.Collection or @type is V1.Backbone.Collection
 
     isSingle: ->
-      @type.prototype instanceof V1.Model or @type is V1.Model
+      @type.prototype instanceof V1.Backbone.Model or @type is V1.Backbone.Model
 
     of: (type) ->
-      throw "Unsupported type must be a V1.Model or a V1.Collection" unless type.prototype instanceof V1.Model or type.prototype instanceof V1.Collection
+      throw "Unsupported type must be a V1.Backbone.Model or a V1.Backbone.Collection" unless type.prototype instanceof V1.Backbone.Model or type.prototype instanceof V1.Backbone.Collection
       @type = type
       this
 
