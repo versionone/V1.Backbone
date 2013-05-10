@@ -25,8 +25,18 @@ describe "Using sync to fetch a collection", ->
 
     members = new Members()
     members.fetch()
-    expect(members.length).to.equal(5)
     expectedNames = ["Administrator","Bob McBobertan","Ian B","Ian Culling","Matt Higgins"]
+    expect(members.pluck("Name")).to.deep.equal(expectedNames)
+
+  it "can find talkative members", ->
+    Members = V1.Backbone.Collection.extend
+      model: V1.Backbone.Model.extend
+        assetType: "Member"
+        schema: [ "Name" ]
+
+    members = new Members()
+    members.fetch(filter: ["ParticipatesInConversations.@Count>'4'"])
+    expectedNames = ["Administrator","Matt Higgins"]
     expect(members.pluck("Name")).to.deep.equal(expectedNames)
 
 

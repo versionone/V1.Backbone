@@ -31,6 +31,8 @@ class V1.Backbone.Collection extends Backbone.Collection
 class V1.Backbone.JsonQuery
   defaultOptions = { fetch: (url, data) -> $.post(url, data) }
 
+  validQueryOptions = ["filter"]
+
   getQueryFor = (type, attribute) ->
     protoModel = if type.prototype instanceof V1.Backbone.Collection then type.prototype.model.prototype else type.prototype
 
@@ -59,9 +61,11 @@ class V1.Backbone.JsonQuery
     @types.push(type)
     @queries.push(getQueryFor(type))
 
-  into: (instance) ->
+  into: (instance, options) ->
     type = instance.constructor
     query = getQueryFor(type)
+
+    _.extend(query, _.pick(options, validQueryOptions))
 
     if (instance instanceof V1.Backbone.Model)
       throw "`id` is required" unless instance.id

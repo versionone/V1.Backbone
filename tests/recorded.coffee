@@ -998,3 +998,18 @@ register 'url', '{"from":"Member","select":["Name"],"where":{"ID":"Member:1017"}
   ]
 ]
 '''
+
+register 'url', '{"from":"Member","select":["Name"],"filter":["ParticipatesInConversations.@Count>\'4\'"]}', '''
+[
+  [
+    {
+      "_oid": "Member:20",
+      "Name": "Administrator"
+    },
+    {
+      "_oid": "Member:1049",
+      "Name": "Matt Higgins"
+    }
+  ]
+]
+'''
