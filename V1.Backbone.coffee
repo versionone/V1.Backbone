@@ -122,18 +122,28 @@ class V1.Backbone.JsonQuery
 
 ### Relation Helpers ###
 
-aug = (target, props) ->
+aug = (target, action) ->
   Dup = ->
   Dup.prototype = target
-  dup = new Dup
-  _.extend(dup, props)
+  _(new Dup()).tap(action || ->)
+
+aug.extend = (target, props) ->
+  aug target, (augmentedResult) -> _.extend(augmentedResult, props)
+
+aug.add = (target, property, values) ->
+  aug target, (augmentedResult) ->
+    augmentedResult[property] = if _.isArray(target[property]) then target[property].concat(values) else values
+
+aug.merge = (target, props) ->
+  aug target, (augmentedResult) ->
+    _(props).each (val, key) -> target[key] = _.extend(val, target[key])
 
 class Alias
   constructor: (@attribute) ->
     @alias = @attribute
 
   as: (alias) ->
-    aug(this, {alias})
+    aug.extend(this, {alias})
 
 V1.Backbone.alias = (attribute) -> new Alias(attribute)
 
@@ -157,6 +167,12 @@ class Relation extends Alias
 
   of: (type) ->
     throw "Unsupported type must be a V1.Backbone.Model or a V1.Backbone.Collection" unless isAcceptable(type)
-    aug(this, {type})
+    aug.extend(this, {type})
+
+  filter: (filters...) ->
+    aug.add(this, "filters", filters)
+
+  where: (wheres) ->
+    aug.merge(this, {wheres})
 
 V1.Backbone.relation = (attribute) -> new Relation(attribute)
