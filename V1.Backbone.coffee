@@ -1,6 +1,6 @@
 V1 = if exports? then exports else (window.V1 ||= {})
-_ = require('underscore') if !_? and require?
-Backbone = require('Backbone') if !Backbone? and require?
+_ = if !window?._? then (if require? then require('underscore') else throw "Unable to load/find underscore") else window._
+Backbone = if !window?.Backbone? then (if require? then require('Backbone') else throw "Unable to load/find backbone") else window.Backbone
 
 defaultQuerier = undefined
 
