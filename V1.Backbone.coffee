@@ -36,18 +36,22 @@ class V1.Backbone.JsonQuery
   getQueryFor = (type, attribute) ->
     protoModel = if type.prototype instanceof V1.Backbone.Collection then type.prototype.model.prototype else type.prototype
 
-    assetType = protoModel.assetType
+    assetType = protoModel.assetType or attribute
 
-    {
-      from: if attribute then "#{attribute} as #{assetType}" else assetType,
-      select: getSelectTokens(protoModel.schema)
-    }
+    query = from: if attribute then "#{attribute} as #{assetType}" else assetType
+    addSelectTokens(protoModel.schema, query)
 
-  getSelectTokens = (schema) ->
-    return [schema] if _.isString(schema)
+    query
 
-    _(schema).map (item) ->
-      return getQueryFor(item.type, item.attribute) if item instanceof Relation
+  addRelation = (relation) ->
+    subQuery = getQueryFor(relation.type, relation.attribute)
+    _.extend(subQuery, _.pick(relation, validQueryOptions))
+
+  addSelectTokens = (schema, query) ->
+    return query.select = [schema] if _.isString(schema)
+    return unless schema? and schema.length > 0
+    query.select = _(schema).map (item) ->
+      return addRelation(item) if item instanceof Relation
       return item.attribute if item instanceof Alias
       return item if _.isString(item)
 
@@ -169,10 +173,10 @@ class Relation extends Alias
     throw "Unsupported type must be a V1.Backbone.Model or a V1.Backbone.Collection" unless isAcceptable(type)
     aug.extend(this, {type})
 
-  filter: (filters...) ->
-    aug.add(this, "filters", filters)
+  addFilter: (filters...) ->
+    aug.add(this, "filter", filters)
 
-  where: (wheres) ->
-    aug.merge(this, {wheres})
+  addWhere: (where) ->
+    aug.merge(this, {where})
 
 V1.Backbone.relation = (attribute) -> new Relation(attribute)

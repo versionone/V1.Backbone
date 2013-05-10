@@ -48,48 +48,48 @@ describe "An attribute relation", ->
     it "should be filterable", ->
       testRelation = relation("Test")
         .of(V1.Backbone.Collection)
-        .filter("FilterToken='1'")
+        .addFilter("FilterToken='1'")
 
-      expect(testRelation.filters).to.deep.equal(["FilterToken='1'"])
+      expect(testRelation.filter).to.deep.equal(["FilterToken='1'"])
 
     it "should be filterable to multiple filters", ->
       testRelation = relation("Test")
         .of(V1.Backbone.Collection)
-        .filter("FilterToken='1'", "ID=Test:1001")
+        .addFilter("FilterToken='1'", "ID=Test:1001")
 
-      expect(testRelation.filters).to.deep.equal(["FilterToken='1'", "ID=Test:1001"])
+      expect(testRelation.filter).to.deep.equal(["FilterToken='1'", "ID=Test:1001"])
 
     it "new filters should *ADD TO* existing ones", ->
       testRelation = relation("Test")
         .of(V1.Backbone.Collection)
-        .filter("FilterToken='1'", "ID=Test:1001")
+        .addFilter("FilterToken='1'", "ID=Test:1001")
 
-      hijackedRelation = testRelation.filter("FilterToken2")
+      hijackedRelation = testRelation.addFilter("FilterToken2")
 
-      expect(hijackedRelation.filters).to.deep.equal(["FilterToken='1'", "ID=Test:1001", "FilterToken2"])
-      expect(testRelation.filters).to.deep.equal(["FilterToken='1'", "ID=Test:1001"])
+      expect(hijackedRelation.filter).to.deep.equal(["FilterToken='1'", "ID=Test:1001", "FilterToken2"])
+      expect(testRelation.filter).to.deep.equal(["FilterToken='1'", "ID=Test:1001"])
 
   describe "with wheres", ->
 
     it "should be where-able", ->
       testRelation = relation("Test")
         .of(V1.Backbone.Collection)
-        .where("FilterToken":'1')
+        .addWhere("FilterToken":'1')
 
-      expect(testRelation.wheres).to.deep.equal({"FilterToken":'1'})
+      expect(testRelation.where).to.deep.equal({"FilterToken":'1'})
 
     it "should accept multiple wheres", ->
       testRelation = relation("Test")
         .of(V1.Backbone.Collection)
-        .where("FilterToken":'1', "ID":"Test:1001")
+        .addWhere("FilterToken":'1', "ID":"Test:1001")
 
-      expect(testRelation.wheres).to.deep.equal({"FilterToken":'1', "ID":"Test:1001"})
+      expect(testRelation.where).to.deep.equal({"FilterToken":'1', "ID":"Test:1001"})
 
     it "new wheres should *ADD TO* existing ones", ->
       testRelation = relation("Test")
         .of(V1.Backbone.Collection)
-        .where("FilterToken":'1', "ID":"Test:1001")
+        .addWhere("FilterToken":'1', "ID":"Test:1001")
 
-      hijackedRelation = testRelation.where("FilterToken2":"100")
+      hijackedRelation = testRelation.addWhere("FilterToken2":"100")
 
-      expect(hijackedRelation.wheres).to.deep.equal({"FilterToken":'1', "ID":"Test:1001", "FilterToken2":"100"})
+      expect(hijackedRelation.where).to.deep.equal({"FilterToken":'1', "ID":"Test:1001", "FilterToken2":"100"})

@@ -120,6 +120,32 @@ describe 'V1.JsonQuery', ->
         query.for(Expressions)
         query.exec()
 
+    describe "filtering relations", ->
+
+      it 'should be able to filter relations using "filter" clauses', ->
+
+        relation = V1.relation
+
+        Expressions = V1.Collection.extend
+          model: V1.Model.extend
+            assetType: "Expression"
+
+        Members = V1.Collection.extend
+          model: V1.Model.extend
+            assetType: "Member"
+            schema: [
+              relation("ParticipatesInConversations")
+                .of(Expressions)
+                .as("BigGroups")
+                .addFilter("ConversationParticipants.@Count>='2'")
+            ]
+
+        ajax = expectedQuery '{"from":"Member","select":[{"from":"ParticipatesInConversations as Expression","filter":["ConversationParticipants.@Count>=\'2\'"]}]}'
+
+        query = new JsonQuery(url:"url", fetch: ajax)
+        query.for(Members)
+        query.exec()
+
 
   describe "getting results", ->
 

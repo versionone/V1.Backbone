@@ -67,7 +67,6 @@ describe "Using `sync`", ->
       V1.Backbone.clearDefaultInstance()
 
     it "will get members and the expressions they participate in", ->
-
       members = new Members()
       members.fetch()
 
