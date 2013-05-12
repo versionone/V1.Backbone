@@ -10,10 +10,14 @@ V1.Backbone =
 
   clearDefaultInstance: -> defaultQuerier = undefined
 
+  begin: (options) ->
+    options = _.extend({}, defaultQuerier?.options, options, {batch: true})
+    new V1.Backbone.JsonQuery(options)
+
 sync = (method, model, options) ->
   throw "Unsupported method: #{method}" unless method is "read"
 
-  querier = this.querier or defaultQuerier
+  querier = this.querier or options.querier or defaultQuerier
   throw "A querier is required" unless querier?
 
   querier.into(model, options)
@@ -27,9 +31,10 @@ class V1.Backbone.Model extends Backbone.Model
 class V1.Backbone.Collection extends Backbone.Collection
   sync: sync
 
-
 class V1.Backbone.JsonQuery
-  defaultOptions = { fetch: (url, data) -> $.post(url, data) }
+  defaultOptions =
+    fetch: () -> $.post.apply($, arguments)
+    defer: () -> $.Deferred.apply($, arguments)
 
   validQueryOptions = ["filter", "where"]
 
@@ -60,12 +65,15 @@ class V1.Backbone.JsonQuery
 
     @options = _.extend({}, defaultOptions, options)
 
-    @types = []
-    @queries = []
+    @clear()
 
   for: (type) ->
-    @types.push(type)
-    @queries.push(getQueryFor(type))
+    @batchInto(type, getQueryFor(type), @queries.length)
+      .pipe (aliasedRows) -> new type(aliasedRows)
+
+  fetch: (instance, options) ->
+    options = _.extend({}, options, { querier: this })
+    instance.fetch(options)
 
   into: (instance, options) ->
     type = instance.constructor
@@ -75,32 +83,47 @@ class V1.Backbone.JsonQuery
 
     if (instance instanceof V1.Backbone.Model)
       throw "`id` is required" unless instance.id
-      (query.where || query.where = {}).ID = instance.id
+      query.where = _.extend(query.where or {}, ID: instance.id)
+
+    return @batchInto(type, query, @queries.length) if @options.batch
 
     data = JSON.stringify(query)
 
     @options.fetch(@options.url, data)
-      .pipe(_.bind(prepareResultFor, type))
+      .pipe((data) -> prepareResultFor(data[0], type))
+
+  findOrCreateBatch: ->
+    @currentBatch = @options.defer() unless @currentBatch?
+    @currentBatch
+
+  batchInto: (type, query, index) ->
+    @queries[index] = query
+
+    @findOrCreateBatch()
+      .pipe((results) -> prepareResultFor(results[index], type))
 
   exec: ->
+    return unless @currentBatch
+
     data = _(this.queries)
       .map((q) -> JSON.stringify(q))
       .join("\n---\n");
 
     @options.fetch(@options.url, data)
-      .pipe(_.bind(transformResults, @types))
+      .done(@resolveBatch)
 
-  transformResults = (data) ->
-    _(data).map(transformRows, this)
+  resolveBatch: (data) =>
+    @currentBatch.resolve(data)
+    @clear()
 
-  prepareResultFor = (data) ->
-    rows = aliasRows(data[0], this)
-    return rows if this.prototype instanceof V1.Backbone.Collection
-    return rows[0] if this.prototype instanceof V1.Backbone.Model
+  clear: =>
+    @queries = []
+    @currentBatch = undefined
 
-  transformRows = (rows, index) ->
-    type = this[index]
-    new type(aliasRows(rows, type))
+  prepareResultFor = (data, type) ->
+    rows = aliasRows(data, type)
+    return rows if type.prototype instanceof V1.Backbone.Collection
+    return rows[0] if type.prototype instanceof V1.Backbone.Model
 
   aliasRows = (rows, type) ->
     schema = if type.prototype instanceof V1.Backbone.Model
@@ -180,3 +203,5 @@ class Relation extends Alias
     aug.merge(this, {where})
 
 V1.Backbone.relation = (attribute) -> new Relation(attribute)
+
+

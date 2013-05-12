@@ -5,7 +5,7 @@ JsonQuery = V1.JsonQuery
 expect = require('chai').expect
 Backbone = require('backbone')
 recorded = require('./recorded')
-
+spy = require('sinon').spy
 deferred = require('Deferred')
 
 describe 'V1.JsonQuery', ->
@@ -22,15 +22,27 @@ describe 'V1.JsonQuery', ->
 
   describe 'executing a query', ->
 
+    it 'should not make a request if nothing has been asked for', ->
+      actualUrl = "/VersionOne.Web/query.legacy.v1"
+
+      fetcher = spy()
+      query = new JsonQuery(url:actualUrl, fetch: fetcher)
+      query.exec()
+
+      expect(fetcher.called).to.be.false
+
     it 'should make a request to the correct url', ->
       actualUrl = "/VersionOne.Web/query.legacy.v1"
 
-      fetcher = (url) ->
+      fetcher = spy (url) ->
         expect(url).to.equal(actualUrl)
         deferred()
 
-      query = new JsonQuery(url:actualUrl, fetch: fetcher)
+      query = new JsonQuery(url:actualUrl, fetch: fetcher, defer: deferred)
+      query.for(V1.Collection)
       query.exec()
+
+      expect(fetcher.called).to.be.true
 
   describe 'converting a backbone model to a query', ->
 
@@ -50,7 +62,7 @@ describe 'V1.JsonQuery', ->
 
         ajax = expectedQuery '{"from":"Member","select":["Name"]}'
 
-        query = new JsonQuery(url:"url", fetch: ajax)
+        query = new JsonQuery(url:"url", fetch: ajax, defer: deferred)
         query.for(Members)
         query.exec()
 
@@ -64,7 +76,7 @@ describe 'V1.JsonQuery', ->
 
         ajax = expectedQuery '{"from":"Expression","select":["Author.Name"]}'
 
-        query = new JsonQuery(url:"url", fetch: ajax)
+        query = new JsonQuery(url:"url", fetch: ajax, defer: deferred)
         query.for(Expressions)
         query.exec()
 
@@ -77,7 +89,7 @@ describe 'V1.JsonQuery', ->
 
         ajax = expectedQuery '{"from":"Expression","select":["Author.Name","Content"]}'
 
-        query = new JsonQuery(url:"url", fetch: ajax)
+        query = new JsonQuery(url:"url", fetch: ajax, defer: deferred)
         query.for(Expressions)
         query.exec()
 
@@ -96,7 +108,7 @@ describe 'V1.JsonQuery', ->
 
         ajax = expectedQuery "{\"from\":\"Expression\",\"select\":[{\"from\":\"Author as Member\",\"select\":[\"Name\"]}]}"
 
-        query = new JsonQuery(url:"url", fetch: ajax)
+        query = new JsonQuery(url:"url", fetch: ajax, defer: deferred)
         query.for(Expressions)
         query.exec()
 
@@ -116,7 +128,7 @@ describe 'V1.JsonQuery', ->
 
         ajax = expectedQuery "{\"from\":\"Expression\",\"select\":[{\"from\":\"ExpressionsInConversation as Expression\",\"select\":[\"Content\"]}]}"
 
-        query = new JsonQuery(url:"url", fetch: ajax)
+        query = new JsonQuery(url:"url", fetch: ajax, defer: deferred)
         query.for(Expressions)
         query.exec()
 
@@ -142,7 +154,7 @@ describe 'V1.JsonQuery', ->
 
         ajax = expectedQuery '{"from":"Member","select":[{"from":"ParticipatesInConversations as Expression","filter":["ConversationParticipants.@Count>=\'2\'"]}]}'
 
-        query = new JsonQuery(url:"url", fetch: ajax)
+        query = new JsonQuery(url:"url", fetch: ajax, defer: deferred)
         query.for(Members)
         query.exec()
 
@@ -155,12 +167,13 @@ describe 'V1.JsonQuery', ->
           assetType: "Member"
           schema: ["Name"]
 
-      query = new JsonQuery(url:"url", fetch: recorded)
-      query.for(Members)
-      query.exec().done (results) ->
-        expect(results.length).to.equal(1)
-        expect(results[0].length).to.equal(5)
-        expect(results[0].at(0).get("Name")).to.equal("Administrator")
+      query = new JsonQuery(url:"url", fetch: recorded, defer: deferred)
+
+      query.for(Members).done (results) ->
+        expect(results.length).to.equal(5)
+        expect(results.at(0).get("Name")).to.equal("Administrator")
+
+      query.exec()
 
     it 'can get results with an alias', ->
 
@@ -169,12 +182,12 @@ describe 'V1.JsonQuery', ->
           assetType: "Member"
           schema: [V1.alias("Name").as("Who")]
 
-      query = new JsonQuery(url:"url", fetch: recorded)
-      query.for(Members)
-      query.exec().done (results) ->
-        expect(results.length).to.equal(1)
-        expect(results[0].length).to.equal(5)
-        expect(results[0].at(0).get("Who")).to.equal("Administrator")
+      query = new JsonQuery(url:"url", fetch: recorded, defer: deferred)
+      query.for(Members).done (results) ->
+        expect(results.length).to.equal(5)
+        expect(results.at(0).get("Who")).to.equal("Administrator")
+
+      query.exec()
 
     it 'can get hydrate results for a relation', ->
 
@@ -187,12 +200,12 @@ describe 'V1.JsonQuery', ->
           assetType: "Expression"
           schema: [ V1.relation("Author").of(Member) ]
 
-      query = new JsonQuery(url:"url", fetch: recorded)
-      query.for(Expressions)
-      query.exec().done (results) ->
-        expect(results.length).to.equal(1)
-        expect(results[0].length).to.equal(41)
-        expect(results[0].at(0).get("Author").get("Name")).to.equal("Administrator")
+      query = new JsonQuery(url:"url", fetch: recorded, defer: deferred)
+      query.for(Expressions).done (results) ->
+        expect(results.length).to.equal(41)
+        expect(results.at(0).get("Author").get("Name")).to.equal("Administrator")
+
+      query.exec()
 
     it 'can support deep aliasing', ->
 
@@ -205,12 +218,12 @@ describe 'V1.JsonQuery', ->
           assetType: "Expression"
           schema: [ V1.relation("Author").of(Member) ]
 
-      query = new JsonQuery(url:"url", fetch: recorded)
-      query.for(Expressions)
-      query.exec().done (results) ->
-        expect(results.length).to.equal(1)
-        expect(results[0].length).to.equal(41)
-        expect(results[0].at(0).get("Author").get("WhoDat")).to.equal("Administrator")
+      query = new JsonQuery(url:"url", fetch: recorded, defer: deferred)
+      query.for(Expressions).done (results) ->
+        expect(results.length).to.equal(41)
+        expect(results.at(0).get("Author").get("WhoDat")).to.equal("Administrator")
+
+      query.exec()
 
     it 'can support deep relations', ->
 
@@ -229,12 +242,10 @@ describe 'V1.JsonQuery', ->
           assetType: "Expression"
           schema: [ V1.relation("ExpressionsInConversation").of(Reply).as("Replies") ]
 
-      query = new JsonQuery(url:"url", fetch: recorded)
-      query.for(Expressions)
-      query.exec().done (results) ->
-        expect(results.length).to.equal(1)
-
-        expressions = results[0]
+      query = new JsonQuery(url:"url", fetch: recorded, defer: deferred)
+      query.for(Expressions).done (expressions) ->
         expect(expressions.length).to.equal(41)
         expect(expressions.at(1).get("Replies")).to.be.an.instanceof(V1.Collection)
         expect(expressions.at(1).get("Replies").at(0).get("Author").get("WhoDat")).to.equal("Administrator")
+
+      query.exec()
