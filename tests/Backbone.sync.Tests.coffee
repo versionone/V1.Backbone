@@ -79,6 +79,9 @@ describe "Using `sync`", ->
     beforeEach ->
       V1.Backbone.setDefaultInstance(url: "url", fetch: recorded)
 
+    afterEach ->
+      V1.Backbone.clearDefaultInstance()
+
     it "can sync an indiviual model", ->
       Member = V1.Backbone.Model.extend
           assetType: "Member"
