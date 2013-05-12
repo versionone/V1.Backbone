@@ -46,6 +46,8 @@ class V1.Backbone.JsonQuery
     query = from: if attribute then "#{attribute} as #{assetType}" else assetType
     addSelectTokens(protoModel.schema, query)
 
+    type.prototype.queryMucker?(query) if type.prototype instanceof V1.Backbone.Collection
+
     query
 
   addRelation = (relation) ->
