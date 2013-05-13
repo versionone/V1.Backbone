@@ -3,6 +3,7 @@ _ = if !window?._? then (if require? then require('underscore') else throw "Unab
 Backbone = if !window?.Backbone? then (if require? then require('Backbone') else throw "Unable to load/find backbone") else window.Backbone
 
 defaultQuerier = undefined
+defaultPersister = undefined
 
 V1.Backbone =
   setDefaultInstance: (options) ->
@@ -10,19 +11,35 @@ V1.Backbone =
 
   clearDefaultInstance: -> defaultQuerier = undefined
 
+  setDefaultPersister: (options) ->
+    defaultPersister = new V1.Backbone.RestPersister(options)
+
+  clearDefaultPersister: -> defaultPersister = undefined
+
   begin: (options) ->
     options = _.extend({}, defaultQuerier?.options, options, {batch: true})
     new V1.Backbone.JsonQuery(options)
 
+syncMethods =
+  read: (model, options) ->
+    querier = this.querier or options.querier or defaultQuerier
+    throw "A querier is required" unless querier?
+
+    querier.into(model, options)
+      .done(options.success).fail(options.error)
+
+  create: (ctx, options) ->
+    persister = this.persister or options.persister or defaultPersister
+    throw "A persister is required" unless persister?
+
+    persister.create(ctx, options)
+      .fail(options.error)
+      .done((data) -> ctx.id = result[1] if result = /id="(\w+:\d+):\d+"/.exec(data))
+      .done(options.success)
+
 sync = (method, model, options) ->
-  throw "Unsupported method: #{method}" unless method is "read"
-
-  querier = this.querier or options.querier or defaultQuerier
-  throw "A querier is required" unless querier?
-
-  querier.into(model, options)
-    .done(options.success).fail(options.error)
-
+  throw "Unsupported sync method: \"#{method}\"" unless syncMethods[method]
+  syncMethods[method].call(this, model, options)
 
 class V1.Backbone.Model extends Backbone.Model
   idAttribute: "_oid"
@@ -150,6 +167,50 @@ class V1.Backbone.JsonQuery
             transformedRow[item.alias] = row[item.attribute]
 
       transformedRow
+
+class V1.Backbone.RestPersister
+  url = _.template("<%= baseUrl %>/<%= assetType %><% if(typeof(id) != \"undefined\") { %>/<%= id %><% } %>")
+
+  defaultOptions =
+    post: () -> $.post.apply($, arguments)
+    defer: () -> $.Deferred.apply($, arguments)
+
+  url: (assetType, id) =>
+    url({baseUrl: @options.url, assetType: assetType, id: id})
+
+  constructor: (options) ->
+    throw "url required" unless options?.url?
+    @options = _.extend({}, defaultOptions, options)
+
+  create: (ctx, options) ->
+    throw "Unsupported context" unless ctx instanceof V1.Backbone.Model
+    changes = ctx.changedAttributes()
+
+    toAttribute = (attribute, alias) ->
+      value = changes[alias]
+      return unless value?
+      "<Attribute name=\"#{_.escape(attribute)}\" act=\"set\">#{_.escape(changes[alias])}</Attribute>"
+
+    toSingleRelation = (relation) ->
+      value = changes[relation.alias]
+      return unless value?
+      oid = value.id
+      "<Relation name=\"#{_.escape(relation.attribute)}\" act=\"set\"><Asset idref=\"#{_.escape(oid)}\" /></Relation>"
+
+    attr = _(ctx.schema)
+      .chain()
+      .map((item) ->
+        return toSingleRelation(item) if item instanceof Relation and item.isSingle()
+        return if item instanceof Relation
+        return toAttribute(item.attribute, item.alias) if item instanceof Alias
+        return toAttribute(item, item) if _.isString(item)
+      )
+      .value()
+      .join("")
+
+    asset = "<Asset>#{attr}</Asset>"
+
+    @options.post(@url(ctx.assetType, ctx.id), asset)
 
 ### Relation Helpers ###
 
