@@ -83,6 +83,8 @@ class V1.Backbone.JsonQuery
 
     _.extend(query, _.pick(options, validQueryOptions))
 
+    instance.queryMucker?(query) if instance.queryMucker? and instance.queryMucker != type.prototype.queryMucker
+
     if (instance instanceof V1.Backbone.Model)
       throw "`id` is required" unless instance.id
       query.where = _.extend(query.where or {}, ID: instance.id)
