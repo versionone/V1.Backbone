@@ -34,7 +34,6 @@ syncMethods =
 
     persister.create(ctx, options)
       .fail(options.error)
-      .done((data) -> ctx.id = result[1] if result = /id="(\w+:\d+):\d+"/.exec(data))
       .done(options.success)
 
 sync = (method, model, options) ->
@@ -172,7 +171,13 @@ class V1.Backbone.RestPersister
   url = _.template("<%= baseUrl %>/<%= assetType %><% if(typeof(id) != \"undefined\") { %>/<%= id %><% } %>")
 
   defaultOptions =
-    post: () -> $.post.apply($, arguments)
+    post: (url, data) ->
+      $.ajax
+        type: "POST"
+        url: url,
+        data: data,
+        dataType: "text"
+
     defer: () -> $.Deferred.apply($, arguments)
 
   url: (assetType, id) =>
@@ -211,6 +216,7 @@ class V1.Backbone.RestPersister
     asset = "<Asset>#{attr}</Asset>"
 
     @options.post(@url(ctx.assetType, ctx.id), asset)
+      .done((data) -> ctx.id = result[1] if result = /id="(\w+:\d+):\d+"/.exec(data))
 
 ### Relation Helpers ###
 
