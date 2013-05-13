@@ -13,10 +13,10 @@ describe "Fetching with `sync`", ->
         schema: [ "Name" ]
 
     beforeEach ->
-      V1.Backbone.setDefaultInstance(url: "url", fetch: recorded)
+      V1.Backbone.setDefaultRetriever(url: "url", fetch: recorded)
 
     afterEach ->
-      V1.Backbone.clearDefaultInstance()
+      V1.Backbone.clearDefaultRetriever()
 
     it "can find all members", ->
       members = new Members()
@@ -56,10 +56,10 @@ describe "Fetching with `sync`", ->
         ]
 
     beforeEach ->
-      V1.Backbone.setDefaultInstance(url: "url", fetch: recorded)
+      V1.Backbone.setDefaultRetriever(url: "url", fetch: recorded)
 
     afterEach ->
-      V1.Backbone.clearDefaultInstance()
+      V1.Backbone.clearDefaultRetriever()
 
     it "will get members and the expressions they participate in", ->
       members = new Members()
@@ -72,10 +72,10 @@ describe "Fetching with `sync`", ->
   describe "a model", ->
 
     beforeEach ->
-      V1.Backbone.setDefaultInstance(url: "url", fetch: recorded)
+      V1.Backbone.setDefaultRetriever(url: "url", fetch: recorded)
 
     afterEach ->
-      V1.Backbone.clearDefaultInstance()
+      V1.Backbone.clearDefaultRetriever()
 
     it "can sync an indiviual model", ->
       Member = V1.Backbone.Model.extend

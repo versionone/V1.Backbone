@@ -2,14 +2,14 @@ V1 = if exports? then exports else (window.V1 ||= {})
 _ = if !window?._? then (if require? then require('underscore') else throw "Unable to load/find underscore") else window._
 Backbone = if !window?.Backbone? then (if require? then require('Backbone') else throw "Unable to load/find backbone") else window.Backbone
 
-defaultQuerier = undefined
+defaultRetriever = undefined
 defaultPersister = undefined
 
 V1.Backbone =
-  setDefaultInstance: (options) ->
-    defaultQuerier = new V1.Backbone.JsonQuery(options)
+  setDefaultRetriever: (options) ->
+    defaultRetriever = new V1.Backbone.JsonRetriever(options)
 
-  clearDefaultInstance: -> defaultQuerier = undefined
+  clearDefaultRetriever: -> defaultRetriever = undefined
 
   setDefaultPersister: (options) ->
     defaultPersister = new V1.Backbone.RestPersister(options)
@@ -17,15 +17,15 @@ V1.Backbone =
   clearDefaultPersister: -> defaultPersister = undefined
 
   begin: (options) ->
-    options = _.extend({}, defaultQuerier?.options, options, {batch: true})
-    new V1.Backbone.JsonQuery(options)
+    options = _.extend({}, defaultRetriever?.options, options, {batch: true})
+    new V1.Backbone.JsonRetriever(options)
 
 syncMethods =
   read: (model, options) ->
-    querier = this.querier or options.querier or defaultQuerier
-    throw "A querier is required" unless querier?
+    retriever = this.retriever or options.retriever or defaultRetriever
+    throw "A retriever is required" unless retriever?
 
-    querier.into(model, options)
+    retriever.into(model, options)
       .done(options.success).fail(options.error)
 
   create: (ctx, options) ->
@@ -48,7 +48,7 @@ class V1.Backbone.Model extends Backbone.Model
 class V1.Backbone.Collection extends Backbone.Collection
   sync: sync
 
-class V1.Backbone.JsonQuery
+class V1.Backbone.JsonRetriever
   defaultOptions =
     fetch: () -> $.post.apply($, arguments)
     defer: () -> $.Deferred.apply($, arguments)
@@ -91,7 +91,7 @@ class V1.Backbone.JsonQuery
       .pipe (aliasedRows) -> new type(aliasedRows)
 
   fetch: (instance, options) ->
-    options = _.extend({}, options, { querier: this })
+    options = _.extend({}, options, { retriever: this })
     instance.fetch(options)
 
   into: (instance, options) ->
