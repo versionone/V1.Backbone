@@ -78,15 +78,7 @@ describe "Creating with `sync`", ->
   describe "setting the ID", ->
 
     it "should get the right url", (done) ->
-
-      post = (url, data) ->
-        deferred().resolve("""<?xml version="1.0" encoding="UTF-8"?>
-
-<Asset href="/VersionOne.Web/rest-1.v1/Data/Expression/1114/1245" id="Expression:1114:1245">
-  <Attribute name="Content">Hello</Attribute>
-</Asset>""")
-
-      persister = createPersister post
+      persister = createPersister recorded
 
       Expression = V1.Backbone.Model.extend
         assetType: "Expression"

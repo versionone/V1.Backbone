@@ -3,17 +3,20 @@ deferred = require('Deferred')
 module.exports = (url, data) ->
   response = fetch(url,data)
   throw "\nNo recorded response for:\n#{url}\n#{data}\n" unless response?
-  deferred().resolve(JSON.parse(response))
+  deferred().resolve(response)
 
 responses = {}
-register = (url, query, response) ->
+registerJson = (url, query, response) ->
+  responses["#{url}:#{query}"] = JSON.parse(response)
+
+registerString = (url, query, response) ->
   responses["#{url}:#{query}"] = response
 
 fetch = (url, query) ->
   responses["#{url}:#{query}"]
 
 
-register 'url', '{"from":"Member","select":["Name"]}', '''
+registerJson 'url', '{"from":"Member","select":["Name"]}', '''
 [
   [
     {
@@ -40,7 +43,7 @@ register 'url', '{"from":"Member","select":["Name"]}', '''
 ]
 '''
 
-register 'url', '{"from":"Expression","select":[{"from":"Author as Member","select":["Name"]}]}', '''
+registerJson 'url', '{"from":"Expression","select":[{"from":"Author as Member","select":["Name"]}]}', '''
 [
   [
     {
@@ -416,7 +419,7 @@ register 'url', '{"from":"Expression","select":[{"from":"Author as Member","sele
 ]
 '''
 
-register 'url', '{"from":"Expression","select":[{"from":"ExpressionsInConversation as Expression","select":[{"from":"Author as Member","select":["Name"]}]}]}', '''
+registerJson 'url', '{"from":"Expression","select":[{"from":"ExpressionsInConversation as Expression","select":[{"from":"Author as Member","select":["Name"]}]}]}', '''
 [
   [
     {
@@ -988,7 +991,7 @@ register 'url', '{"from":"Expression","select":[{"from":"ExpressionsInConversati
 ]
 '''
 
-register 'url', '{"from":"Member","select":["Name"],"where":{"ID":"Member:1017"}}', '''
+registerJson 'url', '{"from":"Member","select":["Name"],"where":{"ID":"Member:1017"}}', '''
 [
   [
     {
@@ -999,7 +1002,7 @@ register 'url', '{"from":"Member","select":["Name"],"where":{"ID":"Member:1017"}
 ]
 '''
 
-register 'url', '{"from":"Member","select":["Name"],"filter":["ParticipatesInConversations.@Count>\'4\'"]}', '''
+registerJson 'url', '{"from":"Member","select":["Name"],"filter":["ParticipatesInConversations.@Count>\'4\'"]}', '''
 [
   [
     {
@@ -1014,7 +1017,7 @@ register 'url', '{"from":"Member","select":["Name"],"filter":["ParticipatesInCon
 ]
 '''
 
-register 'url', '{"from":"Member","select":["Name"],"where":{"Scopes.@Count":2}}', '''
+registerJson 'url', '{"from":"Member","select":["Name"],"where":{"Scopes.@Count":2}}', '''
 [
   [
     {
@@ -1025,7 +1028,7 @@ register 'url', '{"from":"Member","select":["Name"],"where":{"Scopes.@Count":2}}
 ]
 '''
 
-register 'url', '{"from":"Member","select":["Name","ParticipatesInConversations.@Count",{"from":"ParticipatesInConversations as Expression","select":["Content"]}]}', '''
+registerJson 'url', '{"from":"Member","select":["Name","ParticipatesInConversations.@Count",{"from":"ParticipatesInConversations as Expression","select":["Content"]}]}', '''
 [
   [
     {
@@ -1217,7 +1220,7 @@ register 'url', '{"from":"Member","select":["Name","ParticipatesInConversations.
 ]
 '''
 
-register 'url', "{\"from\":\"Member\"}\n---\n{\"from\":\"ExpressionSpace\"}", '''
+registerJson 'url', "{\"from\":\"Member\"}\n---\n{\"from\":\"ExpressionSpace\"}", '''
 [
   [
     {
@@ -1287,4 +1290,10 @@ register 'url', "{\"from\":\"Member\"}\n---\n{\"from\":\"ExpressionSpace\"}", ''
     }
   ]
 ]
+'''
+
+registerString '/VersionOne/rest-1.v1/Data/Expression', '<Asset></Asset>', '''
+<Asset href="/VersionOne.Web/rest-1.v1/Data/Expression/1114/1245" id="Expression:1114:1245">
+  <Attribute name="Content">Hello</Attribute>
+</Asset>
 '''
