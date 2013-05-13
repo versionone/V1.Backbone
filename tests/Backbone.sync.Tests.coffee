@@ -1,16 +1,11 @@
 V1 = require('../V1.Backbone')
-
-JsonQuery = V1.JsonQuery
-
 expect = require('chai').expect
-Backbone = require('backbone')
 recorded = require('./recorded')
-
 deferred = require('Deferred')
 
-describe "Using `sync`", ->
+describe "Fetching with `sync`", ->
 
-  describe "fetching a collection", ->
+  describe "a collection", ->
 
     Members = V1.Backbone.Collection.extend
       model: V1.Backbone.Model.extend
@@ -44,7 +39,7 @@ describe "Using `sync`", ->
       expectedNames = ["Administrator"]
       expect(members.pluck("Name")).to.deep.equal(expectedNames)
 
-  describe "fetching a collection, with relations", ->
+  describe "a collection, with relations", ->
 
     Expressions = V1.Backbone.Collection.extend
       model: V1.Backbone.Model.extend
@@ -74,7 +69,7 @@ describe "Using `sync`", ->
         expect(member.get("ParticipatesInConversations").length).to.equal(parseInt(member.get("ParticipationCount"),10))
 
 
-  describe "Using sync to fetch a model", ->
+  describe "a model", ->
 
     beforeEach ->
       V1.Backbone.setDefaultInstance(url: "url", fetch: recorded)
