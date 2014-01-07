@@ -25,16 +25,22 @@ syncMethods =
     retriever = this.retriever or options.retriever or defaultRetriever
     throw "A retriever is required" unless retriever?
 
-    retriever.into(model, options)
+    xhr = retriever.into(model, options)
       .done(options.success).fail(options.error)
+
+    model.trigger('request', model, xhr, options);
+    xhr
 
   create: (ctx, options) ->
     persister = this.queryOptions.persister or options.persister or defaultPersister
     throw "A persister is required" unless persister?
 
-    persister.create(ctx, options)
+    xhr = persister.create(ctx, options)
       .fail(options.error)
       .done(options.success)
+
+    model.trigger('request', model, xhr, options);
+    xhr
 
 sync = (method, model, options) ->
   throw "Unsupported sync method: \"#{method}\"" unless syncMethods[method]
