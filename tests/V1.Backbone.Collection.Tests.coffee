@@ -56,3 +56,26 @@ describe "A V1.Backbone.Collection", ->
 
       search = new MemberSearch()
       search.fetch({"find":"Andre"})
+
+  describe.only "using WITH", ->
+    afterEach ->
+      V1.Backbone.clearDefaultRetriever()
+
+    it "should generate a correct query", ->
+      fetch = makeFetcher (query) ->
+        console.log(query)
+        expect(query).to.equal('{"from":"Member","select":["Name","Email"],"where":{"Name":"$name","Email":"$email"},"with":{"$name":"Andre Agile","$email":"andre.agile@company.com"}}')
+
+      V1.Backbone.setDefaultRetriever(url: "url", fetch: fetch)
+
+      Member = V1.Backbone.Model.extend
+        queryOptions:
+          assetType: "Member"
+          schema: ["Name","Email"]
+
+      MemberSearch = V1.Backbone.Collection.extend
+        model: Member
+
+      search = new MemberSearch()
+      search.fetch("with": {"$name": "Andre Agile", "$email": "andre.agile@company.com"},"where": {"Name": "$name", "Email": "$email"})
+

@@ -52,7 +52,7 @@ class V1.Backbone.JsonRetriever
     fetch: () -> $.post.apply($, arguments)
     defer: () -> $.Deferred.apply($, arguments)
 
-  validQueryOptions = ["find", "filter", "where"]
+  validQueryOptions = ["find", "filter", "where", "with"]
 
   getQueryFor = (type, attribute) ->
     protoModel = if type.prototype instanceof V1.Backbone.Collection then type.prototype.model.prototype else type.prototype
@@ -91,7 +91,6 @@ class V1.Backbone.JsonRetriever
     findIn = safeConcat(findIn, type::queryOptions?.findIn)
 
     query.findIn = findIn if findIn.length > 0
-
 
   addSelectTokens = (schema, query) ->
     return query.select = [schema] if _.isString(schema)
@@ -295,6 +294,9 @@ class Relation extends Alias
 
   addWhere: (where) ->
     aug.merge(this, {where})
+
+  addWith: (newWith) ->
+    aug.merge(this, {newWith})
 
 V1.Backbone.relation = (attribute) -> new Relation(attribute)
 
