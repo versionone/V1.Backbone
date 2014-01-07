@@ -22,8 +22,9 @@ describe "Creating with `sync`", ->
       persister = createPersister expectedUrl "/VersionOne/rest-1.v1/Data/Expression"
 
       Expression = V1.Backbone.Model.extend
-        assetType: "Expression"
-        persister: persister
+        queryOptions:
+          assetType: "Expression"
+          persister: persister
 
       expression = new Expression()
       expression.save()
@@ -40,8 +41,9 @@ describe "Creating with `sync`", ->
       persister = createPersister expectedPost "<Asset><Attribute name=\"Content\" act=\"set\">Hello</Attribute></Asset>"
 
       Expression = V1.Backbone.Model.extend
-        persister: persister
-        schema: ["Content"]
+        queryOptions:
+          persister: persister
+          schema: ["Content"]
 
       expression = new Expression()
       expression.set("Content", "Hello")
@@ -52,8 +54,9 @@ describe "Creating with `sync`", ->
       persister = createPersister expectedPost "<Asset><Attribute name=\"Content\" act=\"set\">Hello</Attribute></Asset>"
 
       Expression = V1.Backbone.Model.extend
-        persister: persister
-        schema: [ alias("Content").as("words") ]
+        queryOptions:
+          persister: persister
+          schema: [ alias("Content").as("words") ]
 
       expression = new Expression()
       expression.set("words", "Hello")
@@ -65,11 +68,12 @@ describe "Creating with `sync`", ->
       Member = V1.Backbone.Model.extend()
 
       Expression = V1.Backbone.Model.extend
-        persister: persister
-        schema: [
-          alias("Content").as("words")
-          relation("Author").of(Member)
-        ]
+        queryOptions:
+          persister: persister
+          schema: [
+            alias("Content").as("words")
+            relation("Author").of(Member)
+          ]
 
       expression = new Expression()
       expression.set("Author", new Member(_oid:"Member:20"))
@@ -81,8 +85,9 @@ describe "Creating with `sync`", ->
       persister = createPersister recorded
 
       Expression = V1.Backbone.Model.extend
-        assetType: "Expression"
-        persister: persister
+        queryOptions:
+          assetType: "Expression"
+          persister: persister
 
       expression = new Expression()
       expression.save().done ->

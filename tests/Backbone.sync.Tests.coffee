@@ -9,8 +9,9 @@ describe "Fetching with `sync`", ->
 
     Members = V1.Backbone.Collection.extend
       model: V1.Backbone.Model.extend
-        assetType: "Member"
-        schema: [ "Name" ]
+        queryOptions:
+          assetType: "Member"
+          schema: [ "Name" ]
 
     beforeEach ->
       V1.Backbone.setDefaultRetriever(url: "url", fetch: recorded)
@@ -43,17 +44,19 @@ describe "Fetching with `sync`", ->
 
     Expressions = V1.Backbone.Collection.extend
       model: V1.Backbone.Model.extend
-        assetType: "Expression"
-        schema: "Content"
+        queryOptions:
+          assetType: "Expression"
+          schema: "Content"
 
     Members = V1.Backbone.Collection.extend
       model: V1.Backbone.Model.extend
-        assetType: "Member"
-        schema: [
-          "Name"
-          V1.Backbone.alias("ParticipatesInConversations.@Count").as("ParticipationCount")
-          V1.Backbone.relation("ParticipatesInConversations").of(Expressions)
-        ]
+        queryOptions:
+          assetType: "Member"
+          schema: [
+            "Name"
+            V1.Backbone.alias("ParticipatesInConversations.@Count").as("ParticipationCount")
+            V1.Backbone.relation("ParticipatesInConversations").of(Expressions)
+          ]
 
     beforeEach ->
       V1.Backbone.setDefaultRetriever(url: "url", fetch: recorded)
@@ -79,6 +82,7 @@ describe "Fetching with `sync`", ->
 
     it "can sync an indiviual model", ->
       Member = V1.Backbone.Model.extend
+        queryOptions:
           assetType: "Member"
           schema: [ "Name" ]
 

@@ -29,7 +29,7 @@ syncMethods =
       .done(options.success).fail(options.error)
 
   create: (ctx, options) ->
-    persister = this.persister or options.persister or defaultPersister
+    persister = this.queryOptions.persister or options.persister or defaultPersister
     throw "A persister is required" unless persister?
 
     persister.create(ctx, options)
@@ -52,15 +52,19 @@ class V1.Backbone.JsonRetriever
     fetch: () -> $.post.apply($, arguments)
     defer: () -> $.Deferred.apply($, arguments)
 
-  validQueryOptions = ["filter", "where"]
+  validQueryOptions = ["find", "filter", "where"]
 
   getQueryFor = (type, attribute) ->
     protoModel = if type.prototype instanceof V1.Backbone.Collection then type.prototype.model.prototype else type.prototype
 
-    assetType = protoModel.assetType or attribute
+    queryOptions = protoModel.queryOptions
+
+    assetType = queryOptions.assetType or attribute
 
     query = from: if attribute then "#{attribute} as #{assetType}" else assetType
-    addSelectTokens(protoModel.schema, query)
+    addSelectTokens(queryOptions.schema, query)
+    addFilterTokens(type, query)
+    addFindInTokens(type, query)
 
     type.prototype.queryMucker?(query) if type.prototype instanceof V1.Backbone.Collection
 
@@ -69,6 +73,25 @@ class V1.Backbone.JsonRetriever
   addRelation = (relation) ->
     subQuery = getQueryFor(relation.type, relation.attribute)
     _.extend(subQuery, _.pick(relation, validQueryOptions))
+
+  safeConcat = (set, newArray) ->
+      newArray = if _.isString(newArray) then [newArray] else newArray
+      set = set.concat(newArray) if _.isArray(newArray) and newArray.length > 0
+      set
+
+  addFilterTokens = (type, query) ->
+    filter = []
+    filter = safeConcat(filter, type::queryOptions?.filter)
+    filter = safeConcat(filter, type::model::queryOptions?.filter) if type.prototype instanceof V1.Backbone.Collection
+
+    query.filter = filter if filter.length > 0
+
+  addFindInTokens = (type, query) ->
+    findIn = []
+    findIn = safeConcat(findIn, type::queryOptions?.findIn)
+
+    query.findIn = findIn if findIn.length > 0
+
 
   addSelectTokens = (schema, query) ->
     return query.select = [schema] if _.isString(schema)
@@ -147,8 +170,8 @@ class V1.Backbone.JsonRetriever
 
   aliasRows = (rows, type) ->
     schema = if type.prototype instanceof V1.Backbone.Model
-    then type.prototype.schema
-    else type.prototype.model.prototype.schema
+    then type.prototype.queryOptions.schema
+    else type.prototype.model.prototype.queryOptions.schema
 
     schema = [schema] if _.isString(schema)
 
@@ -202,7 +225,7 @@ class V1.Backbone.RestPersister
       oid = value.id
       "<Relation name=\"#{_.escape(relation.attribute)}\" act=\"set\"><Asset idref=\"#{_.escape(oid)}\" /></Relation>"
 
-    attr = _(ctx.schema)
+    attr = _(ctx.queryOptions.schema)
       .chain()
       .map((item) ->
         return toSingleRelation(item) if item instanceof Relation and item.isSingle()
@@ -215,7 +238,7 @@ class V1.Backbone.RestPersister
 
     asset = "<Asset>#{attr}</Asset>"
 
-    @options.post(@url(ctx.assetType, ctx.id), asset)
+    @options.post(@url(ctx.queryOptions.assetType, ctx.id), asset)
       .done((data) -> ctx.id = result[1] if result = /id="(\w+:\d+):\d+"/.exec(data))
 
 ### Relation Helpers ###

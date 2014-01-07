@@ -32,6 +32,12 @@ describe 'V1.Backbone.JsonRetriever', ->
       expect(fetcher.called).to.be.false
 
     it 'should make a request to the correct url', ->
+
+      collection = V1.Backbone.Collection.extend
+        model: V1.Backbone.Model.extend
+          queryOptions:
+            assetType: "Member"
+
       actualUrl = "/VersionOne.Web/query.legacy.v1"
 
       fetcher = spy (url) ->
@@ -39,7 +45,7 @@ describe 'V1.Backbone.JsonRetriever', ->
         deferred()
 
       query = new JsonRetriever(url:actualUrl, fetch: fetcher, defer: deferred)
-      query.for(V1.Backbone.Collection)
+      query.for(collection)
       query.exec()
 
       expect(fetcher.called).to.be.true
@@ -57,8 +63,9 @@ describe 'V1.Backbone.JsonRetriever', ->
 
         Members = V1.Backbone.Collection.extend
           model: V1.Backbone.Model.extend
-            assetType: "Member"
-            schema: ["Name"]
+            queryOptions:
+              assetType: "Member"
+              schema: ["Name"]
 
         ajax = expectedQuery '{"from":"Member","select":["Name"]}'
 
@@ -71,8 +78,9 @@ describe 'V1.Backbone.JsonRetriever', ->
 
         Expressions = V1.Backbone.Collection.extend
           model: V1.Backbone.Model.extend
-            assetType: "Expression"
-            schema: [ alias("Author.Name").as("Speaker") ]
+            queryOptions:
+              assetType: "Expression"
+              schema: [ alias("Author.Name").as("Speaker") ]
 
         ajax = expectedQuery '{"from":"Expression","select":["Author.Name"]}'
 
@@ -84,8 +92,9 @@ describe 'V1.Backbone.JsonRetriever', ->
 
         Expressions = V1.Backbone.Collection.extend
           model: V1.Backbone.Model.extend
-            assetType: "Expression"
-            schema: ["Author.Name", "Content"]
+            queryOptions:
+              assetType: "Expression"
+              schema: ["Author.Name", "Content"]
 
         ajax = expectedQuery '{"from":"Expression","select":["Author.Name","Content"]}'
 
@@ -98,13 +107,15 @@ describe 'V1.Backbone.JsonRetriever', ->
         relation = V1.Backbone.relation
 
         Author = V1.Backbone.Model.extend
-          assetType: "Member"
-          schema: ["Name"]
+          queryOptions:
+            assetType: "Member"
+            schema: ["Name"]
 
         Expressions = V1.Backbone.Collection.extend
           model: V1.Backbone.Model.extend
-            assetType: "Expression"
-            schema: [ relation("Author").of(Author) ]
+            queryOptions:
+              assetType: "Expression"
+              schema: [ relation("Author").of(Author) ]
 
         ajax = expectedQuery "{\"from\":\"Expression\",\"select\":[{\"from\":\"Author as Member\",\"select\":[\"Name\"]}]}"
 
@@ -118,13 +129,15 @@ describe 'V1.Backbone.JsonRetriever', ->
 
         Replies = V1.Backbone.Collection.extend
           model: V1.Backbone.Model.extend
-            assetType: "Expression"
-            schema: ["Content"]
+            queryOptions:
+              assetType: "Expression"
+              schema: ["Content"]
 
         Expressions = V1.Backbone.Collection.extend
           model: V1.Backbone.Model.extend
-            assetType: "Expression"
-            schema: [ relation("ExpressionsInConversation").of(Replies) ]
+            queryOptions:
+              assetType: "Expression"
+              schema: [ relation("ExpressionsInConversation").of(Replies) ]
 
         ajax = expectedQuery "{\"from\":\"Expression\",\"select\":[{\"from\":\"ExpressionsInConversation as Expression\",\"select\":[\"Content\"]}]}"
 
@@ -140,17 +153,19 @@ describe 'V1.Backbone.JsonRetriever', ->
 
         Expressions = V1.Backbone.Collection.extend
           model: V1.Backbone.Model.extend
-            assetType: "Expression"
+            queryOptions:
+              assetType: "Expression"
 
         Members = V1.Backbone.Collection.extend
           model: V1.Backbone.Model.extend
-            assetType: "Member"
-            schema: [
-              relation("ParticipatesInConversations")
-                .of(Expressions)
-                .as("BigGroups")
-                .addFilter("ConversationParticipants.@Count>='2'")
-            ]
+            queryOptions:
+              assetType: "Member"
+              schema: [
+                relation("ParticipatesInConversations")
+                  .of(Expressions)
+                  .as("BigGroups")
+                  .addFilter("ConversationParticipants.@Count>='2'")
+              ]
 
         ajax = expectedQuery '{"from":"Member","select":[{"from":"ParticipatesInConversations as Expression","filter":["ConversationParticipants.@Count>=\'2\'"]}]}'
 
@@ -164,8 +179,9 @@ describe 'V1.Backbone.JsonRetriever', ->
 
       Members = V1.Backbone.Collection.extend
         model: V1.Backbone.Model.extend
-          assetType: "Member"
-          schema: ["Name"]
+          queryOptions:
+            assetType: "Member"
+            schema: ["Name"]
 
       query = new JsonRetriever(url:"url", fetch: recorded, defer: deferred)
 
@@ -179,8 +195,9 @@ describe 'V1.Backbone.JsonRetriever', ->
 
       Members = V1.Backbone.Collection.extend
         model: V1.Backbone.Model.extend
-          assetType: "Member"
-          schema: [V1.Backbone.alias("Name").as("Who")]
+          queryOptions:
+            assetType: "Member"
+            schema: [V1.Backbone.alias("Name").as("Who")]
 
       query = new JsonRetriever(url:"url", fetch: recorded, defer: deferred)
       query.for(Members).done (results) ->
@@ -192,13 +209,15 @@ describe 'V1.Backbone.JsonRetriever', ->
     it 'can get hydrate results for a relation', ->
 
       Member = V1.Backbone.Model.extend
-        assetType: "Member"
-        schema: ["Name"]
+        queryOptions:
+          assetType: "Member"
+          schema: ["Name"]
 
       Expressions = V1.Backbone.Collection.extend
         model: V1.Backbone.Model.extend
-          assetType: "Expression"
-          schema: [ V1.Backbone.relation("Author").of(Member) ]
+          queryOptions:
+            assetType: "Expression"
+            schema: [ V1.Backbone.relation("Author").of(Member) ]
 
       query = new JsonRetriever(url:"url", fetch: recorded, defer: deferred)
       query.for(Expressions).done (results) ->
@@ -210,13 +229,15 @@ describe 'V1.Backbone.JsonRetriever', ->
     it 'can support deep aliasing', ->
 
       Member = V1.Backbone.Model.extend
-        assetType: "Member"
-        schema: [ V1.Backbone.alias("Name").as("WhoDat") ]
+        queryOptions:
+          assetType: "Member"
+          schema: [ V1.Backbone.alias("Name").as("WhoDat") ]
 
       Expressions = V1.Backbone.Collection.extend
         model: V1.Backbone.Model.extend
-          assetType: "Expression"
-          schema: [ V1.Backbone.relation("Author").of(Member) ]
+          queryOptions:
+            assetType: "Expression"
+            schema: [ V1.Backbone.relation("Author").of(Member) ]
 
       query = new JsonRetriever(url:"url", fetch: recorded, defer: deferred)
       query.for(Expressions).done (results) ->
@@ -228,19 +249,22 @@ describe 'V1.Backbone.JsonRetriever', ->
     it 'can support deep relations', ->
 
       Member = V1.Backbone.Model.extend
-        assetType: "Member"
-        schema: [ V1.Backbone.alias("Name").as("WhoDat") ]
+        queryOptions:
+          assetType: "Member"
+          schema: [ V1.Backbone.alias("Name").as("WhoDat") ]
 
       Reply = V1.Backbone.Collection.extend
         model: V1.Backbone.Model.extend
-          assetType: "Expression"
-          schema: [ V1.Backbone.relation("Author").of(Member) ]
+          queryOptions:
+            assetType: "Expression"
+            schema: [ V1.Backbone.relation("Author").of(Member) ]
 
 
       Expressions = V1.Backbone.Collection.extend
         model: V1.Backbone.Model.extend
-          assetType: "Expression"
-          schema: [ V1.Backbone.relation("ExpressionsInConversation").of(Reply).as("Replies") ]
+          queryOptions:
+            assetType: "Expression"
+            schema: [ V1.Backbone.relation("ExpressionsInConversation").of(Reply).as("Replies") ]
 
       query = new JsonRetriever(url:"url", fetch: recorded, defer: deferred)
       query.for(Expressions).done (expressions) ->

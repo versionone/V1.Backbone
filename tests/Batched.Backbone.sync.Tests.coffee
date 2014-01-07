@@ -13,11 +13,13 @@ describe "Batching backbone fetches", ->
 
   Members = V1.Backbone.Collection.extend
     model: V1.Backbone.Model.extend
-      assetType: "Member"
+      queryOptions:
+        assetType: "Member"
 
   ExpressionSpaces = V1.Backbone.Collection.extend
     model: V1.Backbone.Model.extend
-      assetType: "ExpressionSpace"
+      queryOptions:
+        assetType: "ExpressionSpace"
 
   it "should not make any requests before `exec()` has been called", ->
 
