@@ -20,9 +20,13 @@ V1.Backbone =
     options = _.extend({}, defaultRetriever?.options, options, {batch: true})
     new V1.Backbone.JsonRetriever(options)
 
+  mixinTo: (cls) ->
+    cls::sync = sync
+    cls::idAttribute = "_oid" if cls::idAttribute?
+
 syncMethods =
   read: (model, options) ->
-    retriever = this.retriever or options.retriever or defaultRetriever
+    retriever = this.queryOptions.retriever or options.retriever or defaultRetriever
     throw "A retriever is required" unless retriever?
 
     xhr = retriever.into(model, options)
