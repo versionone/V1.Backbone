@@ -26,7 +26,7 @@ V1.Backbone =
 
 syncMethods =
   read: (model, options) ->
-    retriever = this.queryOptions.retriever or options.retriever or defaultRetriever
+    retriever = this.queryOptions?.retriever or options?.retriever or defaultRetriever
     throw "A retriever is required" unless retriever?
 
     xhr = retriever.into(model, options)
@@ -36,7 +36,7 @@ syncMethods =
     xhr
 
   create: (ctx, options) ->
-    persister = this.queryOptions.persister or options.persister or defaultPersister
+    persister = this.queryOptions?.persister or options?.persister or defaultPersister
     throw "A persister is required" unless persister?
 
     xhr = persister.create(ctx, options)
