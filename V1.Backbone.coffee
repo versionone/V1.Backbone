@@ -305,5 +305,3 @@ class Relation extends Alias
     aug.merge(this, {newWith})
 
 V1.Backbone.relation = (attribute) -> new Relation(attribute)
-
-
