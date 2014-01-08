@@ -39,7 +39,7 @@ syncMethods =
       .fail(options.error)
       .done(options.success)
 
-    model.trigger('request', model, xhr, options);
+    ctx.trigger('request', ctx, xhr, options);
     xhr
 
 sync = (method, model, options) ->
