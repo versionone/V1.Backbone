@@ -5,25 +5,6 @@ Backbone = if !this?.Backbone? then (if require? then require('Backbone') else t
 defaultRetriever = undefined
 defaultPersister = undefined
 
-V1.Backbone =
-  setDefaultRetriever: (options) ->
-    defaultRetriever = new V1.Backbone.JsonRetriever(options)
-
-  clearDefaultRetriever: -> defaultRetriever = undefined
-
-  setDefaultPersister: (options) ->
-    defaultPersister = new V1.Backbone.RestPersister(options)
-
-  clearDefaultPersister: -> defaultPersister = undefined
-
-  begin: (options) ->
-    options = _.extend({}, defaultRetriever?.options, options, {batch: true})
-    new V1.Backbone.JsonRetriever(options)
-
-  mixinTo: (cls) ->
-    cls::sync = sync
-    cls::idAttribute = "_oid" if cls::idAttribute?
-
 syncMethods =
   read: (model, options) ->
     retriever = this.queryOptions?.retriever or options?.retriever or defaultRetriever
@@ -50,12 +31,39 @@ sync = (method, model, options) ->
   throw "Unsupported sync method: \"#{method}\"" unless syncMethods[method]
   syncMethods[method].call(this, model, options)
 
-V1.Backbone.Model = Backbone.Model.extend
-  idAttribute: "_oid"
-  sync: sync
+isModel = (type) ->
+  type::isV1 and type is Backbone.Model or type.prototype instanceof Backbone.Model
 
-V1.Backbone.Collection = Backbone.Collection.extend
-  sync: sync
+isCollection = (type) ->
+  type::isV1 and type is Backbone.Collection or type.prototype instanceof Backbone.Collection
+
+isAcceptable = (type) ->
+  isModel(type) or isCollection(type)
+
+mixInTo = (cls) ->
+  cls::sync = sync
+  cls::isV1 = true
+  cls::idAttribute = "_oid" if cls::idAttribute?
+  cls
+
+V1.Backbone =
+  setDefaultRetriever: (options) ->
+    defaultRetriever = new V1.Backbone.JsonRetriever(options)
+
+  clearDefaultRetriever: -> defaultRetriever = undefined
+
+  setDefaultPersister: (options) ->
+    defaultPersister = new V1.Backbone.RestPersister(options)
+
+  clearDefaultPersister: -> defaultPersister = undefined
+
+  begin: (options) ->
+    options = _.extend({}, defaultRetriever?.options, options, {batch: true})
+    new V1.Backbone.JsonRetriever(options)
+
+  mixInTo: mixInTo
+  Model: mixInTo Backbone.Model.extend()
+  Collection: mixInTo Backbone.Collection.extend()
 
 class V1.Backbone.JsonRetriever
   defaultOptions =
@@ -65,7 +73,10 @@ class V1.Backbone.JsonRetriever
   validQueryOptions = ["find", "filter", "where", "with"]
 
   getQueryFor = (type, attribute) ->
-    protoModel = if type.prototype instanceof V1.Backbone.Collection then type.prototype.model.prototype else type.prototype
+    throw "Unsupported type" unless isAcceptable(type)
+
+    protoModel = type.prototype if isModel(type)
+    protoModel = type::model.prototype if isCollection(type)
 
     queryOptions = protoModel.queryOptions
 
@@ -76,7 +87,7 @@ class V1.Backbone.JsonRetriever
     addFilterTokens(type, query)
     addFindInTokens(type, query)
 
-    type.prototype.queryMucker?(query) if type.prototype instanceof V1.Backbone.Collection
+    type.prototype.queryMucker?(query) if isCollection(type)
 
     query
 
@@ -92,7 +103,7 @@ class V1.Backbone.JsonRetriever
   addFilterTokens = (type, query) ->
     filter = []
     filter = safeConcat(filter, type::queryOptions?.filter)
-    filter = safeConcat(filter, type::model::queryOptions?.filter) if type.prototype instanceof V1.Backbone.Collection
+    filter = safeConcat(filter, type::model::queryOptions?.filter) if isCollection(type)
 
     query.filter = filter if filter.length > 0
 
@@ -133,7 +144,7 @@ class V1.Backbone.JsonRetriever
 
     instance.queryMucker?(query) if instance.queryMucker? and instance.queryMucker != type.prototype.queryMucker
 
-    if (instance instanceof V1.Backbone.Model)
+    if isModel(type)
       throw "`id` is required" unless instance.id
       query.where = _.extend(query.where or {}, ID: instance.id)
 
@@ -174,13 +185,13 @@ class V1.Backbone.JsonRetriever
 
   prepareResultFor = (data, type) ->
     rows = aliasRows(data, type)
-    return rows if type.prototype instanceof V1.Backbone.Collection
-    return rows[0] if type.prototype instanceof V1.Backbone.Model
+    return rows if isCollection(type)
+    return rows[0] if isModel(type)
 
   aliasRows = (rows, type) ->
-    schema = if type.prototype instanceof V1.Backbone.Model
-    then type.prototype.queryOptions.schema
-    else type.prototype.model.prototype.queryOptions.schema
+    schema = if isModel(type)
+    then type::queryOptions?.schema
+    else type::model::queryOptions?.schema
 
     schema = [schema] if _.isString(schema)
 
@@ -220,7 +231,7 @@ class V1.Backbone.RestPersister
     @options = _.extend({}, defaultOptions, options)
 
   create: (ctx, options) ->
-    throw "Unsupported context" unless ctx instanceof V1.Backbone.Model
+    throw "Unsupported context" unless isModel(ctx.constructor)
     changes = ctx.changedAttributes()
 
     toAttribute = (attribute, alias) ->
@@ -278,22 +289,15 @@ class Alias
 V1.Backbone.alias = (attribute) -> new Alias(attribute)
 
 class Relation extends Alias
-
-  isAcceptable = (type) ->
-    type.prototype instanceof V1.Backbone.Model or
-    type.prototype instanceof V1.Backbone.Collection or
-    type is V1.Backbone.Collection or
-    type is V1.Backbone.Model
-
   constructor: (@attribute) ->
     super(@attribute)
     @type = V1.Backbone.Collection
 
   isMulti: ->
-    @type.prototype instanceof V1.Backbone.Collection or @type is V1.Backbone.Collection
+    isCollection(@type)
 
   isSingle: ->
-    @type.prototype instanceof V1.Backbone.Model or @type is V1.Backbone.Model
+    isModel(@type)
 
   of: (type) ->
     throw "Unsupported type must be a V1.Backbone.Model or a V1.Backbone.Collection" unless isAcceptable(type)
