@@ -46,11 +46,11 @@ sync = (method, model, options) ->
   throw "Unsupported sync method: \"#{method}\"" unless syncMethods[method]
   syncMethods[method].call(this, model, options)
 
-class V1.Backbone.Model extends Backbone.Model
+V1.Backbone.Model = Backbone.Model.extend
   idAttribute: "_oid"
   sync: sync
 
-class V1.Backbone.Collection extends Backbone.Collection
+V1.Backbone.Collection = Backbone.Collection.extend
   sync: sync
 
 class V1.Backbone.JsonRetriever
