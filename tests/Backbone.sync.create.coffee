@@ -49,6 +49,33 @@ describe "Creating with `sync`", ->
       expression.set("Content", "Hello")
       expression.save().done(done)
 
+    it "can set complex attributes", (done) ->
+
+      persister = createPersister expectedPost '<Asset><Attribute name="Content" act="set">Hello</Attribute><Attribute name="Name" act="set">World</Attribute></Asset>'
+
+      Expression = V1.Backbone.Model.extend
+        queryOptions:
+          persister: persister
+          schema: ["Content", "Name"]
+
+      expression = new Expression()
+      expression.set({"Content":"Hello", "Name":"World"})
+      expression.save().done(done)
+
+    it "can set multiple attributes", (done) ->
+
+      persister = createPersister expectedPost '<Asset><Attribute name="Content" act="set">Hello</Attribute><Attribute name="Name" act="set">World</Attribute></Asset>'
+
+      Expression = V1.Backbone.Model.extend
+        queryOptions:
+          persister: persister
+          schema: ["Content", "Name"]
+
+      expression = new Expression()
+      expression.set("Content", "Hello")
+      expression.set("Name", "World")
+      expression.save().done(done)
+
     it "can handle aliases of attributes", (done) ->
 
       persister = createPersister expectedPost "<Asset><Attribute name=\"Content\" act=\"set\">Hello</Attribute></Asset>"

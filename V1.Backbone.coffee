@@ -232,20 +232,20 @@ class V1.Backbone.RestPersister
 
   create: (ctx, options) ->
     throw "Unsupported context" unless isModel(ctx.constructor)
-    changes = ctx.changedAttributes()
+    attr = ctx.attributes
 
     toAttribute = (attribute, alias) ->
-      value = changes[alias]
+      value = attr[alias]
       return unless value?
-      "<Attribute name=\"#{_.escape(attribute)}\" act=\"set\">#{_.escape(changes[alias])}</Attribute>"
+      "<Attribute name=\"#{_.escape(attribute)}\" act=\"set\">#{_.escape(attr[alias])}</Attribute>"
 
     toSingleRelation = (relation) ->
-      value = changes[relation.alias]
+      value = attr[relation.alias]
       return unless value?
       oid = value.id
       "<Relation name=\"#{_.escape(relation.attribute)}\" act=\"set\"><Asset idref=\"#{_.escape(oid)}\" /></Relation>"
 
-    attr = _(ctx.queryOptions.schema)
+    attrXml = _(ctx.queryOptions.schema)
       .chain()
       .map((item) ->
         return toSingleRelation(item) if item instanceof Relation and item.isSingle()
@@ -256,7 +256,7 @@ class V1.Backbone.RestPersister
       .value()
       .join("")
 
-    asset = "<Asset>#{attr}</Asset>"
+    asset = "<Asset>#{attrXml}</Asset>"
 
     @options.post(@url(ctx.queryOptions.assetType, ctx.id), asset)
       .done((data) -> ctx.id = result[1] if result = /id="(\w+:\d+):\d+"/.exec(data))
