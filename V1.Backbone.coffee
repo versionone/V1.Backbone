@@ -1,6 +1,6 @@
 V1 = if exports? then exports else this.V1 or (this.V1 = {})
 _ = if !this?._? then (if require? then require('underscore') else throw "Unable to load/find underscore") else this._
-Backbone = if !this?.Backbone? then (if require? then require('Backbone') else throw "Unable to load/find backbone") else this.Backbone
+Backbone = if !this?.Backbone? then (if require? then require('backbone') else throw "Unable to load/find backbone") else this.Backbone
 
 defaultRetriever = undefined
 defaultPersister = undefined

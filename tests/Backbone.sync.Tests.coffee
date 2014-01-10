@@ -1,4 +1,4 @@
-Backbone = require('Backbone')
+Backbone = require('backbone')
 V1 = require('../V1.Backbone')
 expect = require('chai').expect
 recorded = require('./recorded')
