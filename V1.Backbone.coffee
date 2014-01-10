@@ -232,7 +232,8 @@ class V1.Backbone.RestPersister
 
   create: (ctx, options) ->
     throw "Unsupported context" unless isModel(ctx.constructor)
-    attr = ctx.attributes
+    options = options || {}
+    attr = options.attrs || ctx.toJSON(options)
 
     toAttribute = (attribute, alias) ->
       value = attr[alias]

@@ -76,6 +76,19 @@ describe "Creating with `sync`", ->
       expression.set("Name", "World")
       expression.save().done(done)
 
+    it "can handle attributes passed in as options", (done) ->
+
+      persister = createPersister expectedPost '<Asset><Attribute name="Content" act="set">Hello</Attribute><Attribute name="Name" act="set">World</Attribute></Asset>'
+
+      Expression = V1.Backbone.Model.extend
+        queryOptions:
+          persister: persister
+          schema: ["Content", "Name"]
+
+      expression = new Expression()
+
+      persister.create(expression,{attrs:{"Content":"Hello", "Name":"World"}}).done(done)
+
     it "can handle aliases of attributes", (done) ->
 
       persister = createPersister expectedPost "<Asset><Attribute name=\"Content\" act=\"set\">Hello</Attribute></Asset>"
