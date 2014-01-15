@@ -152,8 +152,13 @@ class V1.Backbone.JsonRetriever
 
     data = JSON.stringify(query)
 
-    @options.fetch(@options.url, data)
-      .pipe((data) -> prepareResultFor(data[0], type))
+    xhr = @options.fetch(@options.url, data)
+
+    deferred = xhr.pipe (data) -> prepareResultFor(data[0], type)
+    deferred.abort = _.bind(xhr.abort, xhr) if xhr.abort? and !deferred.abort?
+
+    deferred
+
 
   findOrCreateBatch: ->
     @currentBatch = @options.defer() unless @currentBatch?
