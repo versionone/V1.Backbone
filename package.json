@@ -2,9 +2,9 @@
   "name": "Backbone.V1",
   "version": "0.0.1",
   "description": "a simple backbone adapter for V1 queries",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/versionone/V1.Backbone.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/versionone/V1.Backbone.git"
   },
   "contributors": [
     {
