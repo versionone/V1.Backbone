@@ -9,7 +9,7 @@ module.exports = function(grunt) {
     watch: {
       scripts: {
         files: ['V1.Backbone.coffee', 'tests/**/*.coffee'],
-        tasks: ["mochaTest", "coffee:compile", 'uglify'],
+        tasks: ["coffee:compile", 'uglify', "mochaTest"],
         options: { spawn: true }
       }
     },
