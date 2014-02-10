@@ -5,6 +5,11 @@ Backbone = if !this?.Backbone? then (if require? then require('backbone') else t
 defaultRetriever = undefined
 defaultPersister = undefined
 
+getPeristerFrom = (self, options) ->
+  persister = self.queryOptions?.persister or options?.persister or defaultPersister
+  throw "A persister is required" unless persister?
+  persister
+
 syncMethods =
   read: (model, options) ->
     retriever = this.queryOptions?.retriever or options?.retriever or defaultRetriever
@@ -17,8 +22,7 @@ syncMethods =
     xhr
 
   create: (ctx, options) ->
-    persister = this.queryOptions?.persister or options?.persister or defaultPersister
-    throw "A persister is required" unless persister?
+    persister = getPeristerFrom(this, options)
 
     xhr = persister.create(ctx, options)
       .fail(options.error)
@@ -28,8 +32,8 @@ syncMethods =
     xhr
 
   delete: (ctx, options) ->
-    persister = this.queryOptions?.persister or options?.persister or defaultPersister
-    throw "A persister is required" unless persister?
+    persister = getPeristerFrom(this, options)
+
     xhr = persister.delete(ctx, options)
       .fail(options.error)
       .done(options.success)

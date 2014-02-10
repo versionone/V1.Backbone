@@ -1,5 +1,5 @@
 (function() {
-  var Alias, Backbone, Relation, V1, aug, defaultPersister, defaultRetriever, isAcceptable, isCollection, isModel, mixInTo, sync, syncMethods, _,
+  var Alias, Backbone, Relation, V1, aug, defaultPersister, defaultRetriever, getPeristerFrom, isAcceptable, isCollection, isModel, mixInTo, sync, syncMethods, _,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -27,6 +27,15 @@
 
   defaultPersister = void 0;
 
+  getPeristerFrom = function(self, options) {
+    var persister, _ref;
+    persister = ((_ref = self.queryOptions) != null ? _ref.persister : void 0) || (options != null ? options.persister : void 0) || defaultPersister;
+    if (persister == null) {
+      throw "A persister is required";
+    }
+    return persister;
+  };
+
   syncMethods = {
     read: function(model, options) {
       var retriever, xhr, _ref;
@@ -39,21 +48,15 @@
       return xhr;
     },
     create: function(ctx, options) {
-      var persister, xhr, _ref;
-      persister = ((_ref = this.queryOptions) != null ? _ref.persister : void 0) || (options != null ? options.persister : void 0) || defaultPersister;
-      if (persister == null) {
-        throw "A persister is required";
-      }
+      var persister, xhr;
+      persister = getPeristerFrom(this, options);
       xhr = persister.create(ctx, options).fail(options.error).done(options.success);
       ctx.trigger('request', ctx, xhr, options);
       return xhr;
     },
     "delete": function(ctx, options) {
-      var persister, xhr, _ref;
-      persister = ((_ref = this.queryOptions) != null ? _ref.persister : void 0) || (options != null ? options.persister : void 0) || defaultPersister;
-      if (persister == null) {
-        throw "A persister is required";
-      }
+      var persister, xhr;
+      persister = getPeristerFrom(this, options);
       xhr = persister["delete"](ctx, options).fail(options.error).done(options.success);
       ctx.trigger('request', ctx, xhr, options);
       return xhr;
