@@ -27,6 +27,18 @@ syncMethods =
     ctx.trigger('request', ctx, xhr, options);
     xhr
 
+  delete: (ctx, options) ->
+    persister = this.queryOptions?.persister or options?.persister or defaultPersister
+    throw "A persister is required" unless persister?
+    xhr = persister.delete(ctx, options)
+      .fail(options.error)
+      .done(options.success)
+
+    ctx.trigger('request', ctx, xhr, options);
+    xhr
+
+
+
 sync = (method, model, options) ->
   throw "Unsupported sync method: \"#{method}\"" unless syncMethods[method]
   syncMethods[method].call(this, model, options)
@@ -228,12 +240,19 @@ class V1.Backbone.RestPersister
 
     defer: () -> $.Deferred.apply($, arguments)
 
-  url: (assetType, id) =>
-    url({baseUrl: @options.url, assetType: assetType, id: id})
+  url: (assetType, oid) =>
+    oidParts = if oid? then oid.split(":") else []
+    url({baseUrl: @options.url, assetType: oidParts[0] or assetType, id: oidParts[1]})
 
   constructor: (options) ->
     throw "url required" unless options?.url?
     @options = _.extend({}, defaultOptions, options)
+
+  delete: (ctx, options) ->
+    throw "Unsupported context" unless isModel(ctx.constructor)
+    options = options || {}
+    attr = options.attrs || ctx.toJSON(options)
+    @options.post(@url(ctx.queryOptions.assetType, ctx.id)+"?op=Delete")
 
   create: (ctx, options) ->
     throw "Unsupported context" unless isModel(ctx.constructor)

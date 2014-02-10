@@ -47,6 +47,16 @@
       xhr = persister.create(ctx, options).fail(options.error).done(options.success);
       ctx.trigger('request', ctx, xhr, options);
       return xhr;
+    },
+    "delete": function(ctx, options) {
+      var persister, xhr, _ref;
+      persister = ((_ref = this.queryOptions) != null ? _ref.persister : void 0) || (options != null ? options.persister : void 0) || defaultPersister;
+      if (persister == null) {
+        throw "A persister is required";
+      }
+      xhr = persister["delete"](ctx, options).fail(options.error).done(options.success);
+      ctx.trigger('request', ctx, xhr, options);
+      return xhr;
     }
   };
 
@@ -355,11 +365,13 @@
       }
     };
 
-    RestPersister.prototype.url = function(assetType, id) {
+    RestPersister.prototype.url = function(assetType, oid) {
+      var oidParts;
+      oidParts = oid != null ? oid.split(":") : [];
       return url({
         baseUrl: this.options.url,
-        assetType: assetType,
-        id: id
+        assetType: oidParts[0] || assetType,
+        id: oidParts[1]
       });
     };
 
@@ -370,6 +382,16 @@
       }
       this.options = _.extend({}, defaultOptions, options);
     }
+
+    RestPersister.prototype["delete"] = function(ctx, options) {
+      var attr;
+      if (!isModel(ctx.constructor)) {
+        throw "Unsupported context";
+      }
+      options = options || {};
+      attr = options.attrs || ctx.toJSON(options);
+      return this.options.post(this.url(ctx.queryOptions.assetType, ctx.id) + "?op=Delete");
+    };
 
     RestPersister.prototype.create = function(ctx, options) {
       var asset, attr, attrXml, toAttribute, toSingleRelation;
