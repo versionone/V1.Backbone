@@ -41,7 +41,15 @@ syncMethods =
     ctx.trigger('request', ctx, xhr, options);
     xhr
 
+  update: (ctx, options) ->
+    persister = getPeristerFrom(this, options)
 
+    xhr = persister.update(ctx, options)
+      .fail(options.error)
+      .done(options.success)
+
+    ctx.trigger('request', ctx, xhr, options);
+    xhr
 
 sync = (method, model, options) ->
   throw "Unsupported sync method: \"#{method}\"" unless syncMethods[method]
@@ -257,6 +265,23 @@ class V1.Backbone.RestPersister
     options = options || {}
     attr = options.attrs || ctx.toJSON(options)
     @options.post(@url(ctx.queryOptions.assetType, ctx.id)+"?op=Delete")
+
+  update: (ctx, options) ->
+    schema = _.indexBy ctx.queryOptions.schema, (val) ->
+      return val if _.isString()
+      val.alias
+
+    toAttribute = (attribute, value) ->
+      "<Attribute name=\"#{_.escape(attribute)}\" act=\"set\">#{_.escape(value)}</Attribute>"
+
+    toXml = (val, key) ->
+      item = schema[key] || key
+      return toAttribute(item.attribute, val) if item instanceof Alias
+      return toAttribute(item, val) if _.isString(item)
+
+    attrXml = _.map(ctx.changedAttributes(), toXml).join("")
+    asset = "<Asset>#{attrXml}</Asset>"
+    @options.post(@url(ctx.queryOptions.assetType, ctx.id), asset)
 
   create: (ctx, options) ->
     throw "Unsupported context" unless isModel(ctx.constructor)

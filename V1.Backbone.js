@@ -60,6 +60,13 @@
       xhr = persister["delete"](ctx, options).fail(options.error).done(options.success);
       ctx.trigger('request', ctx, xhr, options);
       return xhr;
+    },
+    update: function(ctx, options) {
+      var persister, xhr;
+      persister = getPeristerFrom(this, options);
+      xhr = persister.update(ctx, options).fail(options.error).done(options.success);
+      ctx.trigger('request', ctx, xhr, options);
+      return xhr;
     }
   };
 
@@ -394,6 +401,32 @@
       options = options || {};
       attr = options.attrs || ctx.toJSON(options);
       return this.options.post(this.url(ctx.queryOptions.assetType, ctx.id) + "?op=Delete");
+    };
+
+    RestPersister.prototype.update = function(ctx, options) {
+      var asset, attrXml, schema, toAttribute, toXml;
+      schema = _.indexBy(ctx.queryOptions.schema, function(val) {
+        if (_.isString()) {
+          return val;
+        }
+        return val.alias;
+      });
+      toAttribute = function(attribute, value) {
+        return "<Attribute name=\"" + (_.escape(attribute)) + "\" act=\"set\">" + (_.escape(value)) + "</Attribute>";
+      };
+      toXml = function(val, key) {
+        var item;
+        item = schema[key] || key;
+        if (item instanceof Alias) {
+          return toAttribute(item.attribute, val);
+        }
+        if (_.isString(item)) {
+          return toAttribute(item, val);
+        }
+      };
+      attrXml = _.map(ctx.changedAttributes(), toXml).join("");
+      asset = "<Asset>" + attrXml + "</Asset>";
+      return this.options.post(this.url(ctx.queryOptions.assetType, ctx.id), asset);
     };
 
     RestPersister.prototype.create = function(ctx, options) {
