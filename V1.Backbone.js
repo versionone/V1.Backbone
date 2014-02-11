@@ -77,9 +77,9 @@
       };
       return {
         read: readFromRetriever,
-        create: syncToPersisterMethod("create"),
-        "delete": syncToPersisterMethod("delete"),
-        update: syncToPersisterMethod("update")
+        create: syncToPersisterMethod("send"),
+        update: syncToPersisterMethod("send"),
+        "delete": syncToPersisterMethod("delete")
       };
     })();
     return function(method, model, options) {
@@ -372,9 +372,17 @@
   })();
 
   V1.Backbone.RestPersister = (function() {
-    var defaultOptions, url;
+    var defaultOptions, toAttribute, toSingleRelation, urlTmpl;
 
-    url = _.template("<%= baseUrl %>/<%= assetType %><% if(typeof(id) != \"undefined\") { %>/<%= id %><% } %>");
+    urlTmpl = _.template("<%= baseUrl %>/<%= assetType %><% if(typeof(id) != \"undefined\") { %>/<%= id %><% } %>");
+
+    toAttribute = function(attribute, value) {
+      return "<Attribute name=\"" + (_.escape(attribute)) + "\" act=\"set\">" + (_.escape(value)) + "</Attribute>";
+    };
+
+    toSingleRelation = function(attribute, oid) {
+      return "<Relation name=\"" + (_.escape(attribute)) + "\" act=\"set\"><Asset idref=\"" + (_.escape(oid)) + "\" /></Relation>";
+    };
 
     defaultOptions = {
       post: function(url, data) {
@@ -393,7 +401,7 @@
     RestPersister.prototype.url = function(assetType, oid) {
       var oidParts;
       oidParts = oid != null ? oid.split(":") : [];
-      return url({
+      return urlTmpl({
         baseUrl: this.options.url,
         assetType: oidParts[0] || assetType,
         id: oidParts[1]
@@ -418,20 +426,30 @@
       return this.options.post(this.url(ctx.queryOptions.assetType, ctx.id) + "?op=Delete");
     };
 
-    RestPersister.prototype.update = function(ctx, options) {
-      var asset, attrXml, schema, toAttribute, toXml;
+    RestPersister.prototype.send = function(ctx, options) {
+      var send;
+      send = options.patch === true ? this.sendPatch : this.sendAll;
+      return send.apply(this, arguments);
+    };
+
+    RestPersister.prototype.sendPatch = function(ctx, options) {
+      var asset, attrXml, schema, toXml, url;
       schema = _.indexBy(ctx.queryOptions.schema, function(val) {
-        if (_.isString()) {
+        if (val instanceof Alias) {
+          return val.alias;
+        } else {
           return val;
         }
-        return val.alias;
       });
-      toAttribute = function(attribute, value) {
-        return "<Attribute name=\"" + (_.escape(attribute)) + "\" act=\"set\">" + (_.escape(value)) + "</Attribute>";
-      };
       toXml = function(val, key) {
         var item;
         item = schema[key] || key;
+        if (item instanceof Relation && item.isSingle() && (attr[item.alias] != null)) {
+          return toSingleRelation(item.attribute, attr[item.alias].id);
+        }
+        if (item instanceof Relation) {
+          return;
+        }
         if (item instanceof Alias) {
           return toAttribute(item.attribute, val);
         }
@@ -441,49 +459,35 @@
       };
       attrXml = _.map(ctx.changedAttributes(), toXml).join("");
       asset = "<Asset>" + attrXml + "</Asset>";
-      return this.options.post(this.url(ctx.queryOptions.assetType, ctx.id), asset);
+      url = this.url(ctx.queryOptions.assetType, ctx.id);
+      return this.options.post(url, asset);
     };
 
-    RestPersister.prototype.create = function(ctx, options) {
-      var asset, attr, attrXml, toAttribute, toSingleRelation;
+    RestPersister.prototype.sendAll = function(ctx, options) {
+      var asset, attr, attrXml, toXml, url;
       if (!isModel(ctx.constructor)) {
         throw "Unsupported context";
       }
       options = options || {};
       attr = options.attrs || ctx.toJSON(options);
-      toAttribute = function(attribute, alias) {
-        var value;
-        value = attr[alias];
-        if (value == null) {
-          return;
-        }
-        return "<Attribute name=\"" + (_.escape(attribute)) + "\" act=\"set\">" + (_.escape(attr[alias])) + "</Attribute>";
-      };
-      toSingleRelation = function(relation) {
-        var oid, value;
-        value = attr[relation.alias];
-        if (value == null) {
-          return;
-        }
-        oid = value.id;
-        return "<Relation name=\"" + (_.escape(relation.attribute)) + "\" act=\"set\"><Asset idref=\"" + (_.escape(oid)) + "\" /></Relation>";
-      };
-      attrXml = _(ctx.queryOptions.schema).chain().map(function(item) {
-        if (item instanceof Relation && item.isSingle()) {
-          return toSingleRelation(item);
+      toXml = function(item) {
+        if (item instanceof Relation && item.isSingle() && (attr[item.alias] != null)) {
+          return toSingleRelation(item.attribute, attr[item.alias].id);
         }
         if (item instanceof Relation) {
           return;
         }
-        if (item instanceof Alias) {
-          return toAttribute(item.attribute, item.alias);
+        if (item instanceof Alias && (attr[item.alias] != null)) {
+          return toAttribute(item.attribute, attr[item.alias]);
         }
-        if (_.isString(item)) {
-          return toAttribute(item, item);
+        if (_.isString(item) && (attr[item] != null)) {
+          return toAttribute(item, attr[item]);
         }
-      }).value().join("");
+      };
+      attrXml = _.map(ctx.queryOptions.schema, toXml).join("");
       asset = "<Asset>" + attrXml + "</Asset>";
-      return this.options.post(this.url(ctx.queryOptions.assetType, ctx.id), asset).done(function(data) {
+      url = this.url(ctx.queryOptions.assetType, ctx.id);
+      return this.options.post(url, asset).done(function(data) {
         var result;
         if (result = /id="(\w+:\d+):\d+"/.exec(data)) {
           return ctx.id = result[1];

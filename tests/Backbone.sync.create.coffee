@@ -87,7 +87,7 @@ describe "Creating with `sync`", ->
 
       expression = new Expression()
 
-      persister.create(expression,{attrs:{"Content":"Hello", "Name":"World"}}).done(done)
+      persister.send(expression,{attrs:{"Content":"Hello", "Name":"World"}}).done(done)
 
     it "can handle aliases of attributes", (done) ->
 

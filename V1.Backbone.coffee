@@ -44,9 +44,10 @@ sync = do ->
       xhr
 
     read: readFromRetriever
-    create: syncToPersisterMethod("create")
+    create: syncToPersisterMethod("send")
+    update: syncToPersisterMethod("send")
     delete: syncToPersisterMethod("delete")
-    update: syncToPersisterMethod("update")
+
 
   (method, model, options) ->
     throw "Unsupported sync method: \"#{method}\"" unless methods[method]
@@ -237,7 +238,13 @@ class V1.Backbone.JsonRetriever
       transformedRow
 
 class V1.Backbone.RestPersister
-  url = _.template("<%= baseUrl %>/<%= assetType %><% if(typeof(id) != \"undefined\") { %>/<%= id %><% } %>")
+  urlTmpl = _.template("<%= baseUrl %>/<%= assetType %><% if(typeof(id) != \"undefined\") { %>/<%= id %><% } %>")
+
+  toAttribute = (attribute, value) ->
+    "<Attribute name=\"#{_.escape(attribute)}\" act=\"set\">#{_.escape(value)}</Attribute>"
+
+  toSingleRelation = (attribute, oid) ->
+    "<Relation name=\"#{_.escape(attribute)}\" act=\"set\"><Asset idref=\"#{_.escape(oid)}\" /></Relation>"
 
   defaultOptions =
     post: (url, data) ->
@@ -251,7 +258,7 @@ class V1.Backbone.RestPersister
 
   url: (assetType, oid) =>
     oidParts = if oid? then oid.split(":") else []
-    url({baseUrl: @options.url, assetType: oidParts[0] or assetType, id: oidParts[1]})
+    urlTmpl({baseUrl: @options.url, assetType: oidParts[0] or assetType, id: oidParts[1]})
 
   constructor: (options) ->
     throw "url required" unless options?.url?
@@ -263,53 +270,42 @@ class V1.Backbone.RestPersister
     attr = options.attrs || ctx.toJSON(options)
     @options.post(@url(ctx.queryOptions.assetType, ctx.id)+"?op=Delete")
 
-  update: (ctx, options) ->
-    schema = _.indexBy ctx.queryOptions.schema, (val) ->
-      return val if _.isString()
-      val.alias
+  send: (ctx, options) ->
+    send = if options.patch is yes then @sendPatch else @sendAll
+    send.apply(this, arguments)
 
-    toAttribute = (attribute, value) ->
-      "<Attribute name=\"#{_.escape(attribute)}\" act=\"set\">#{_.escape(value)}</Attribute>"
+  sendPatch: (ctx, options) ->
+    schema = _.indexBy ctx.queryOptions.schema, (val) ->
+      if (val instanceof Alias) then val.alias else val
 
     toXml = (val, key) ->
       item = schema[key] || key
+      return toSingleRelation(item.attribute, attr[item.alias].id) if item instanceof Relation and item.isSingle() and attr[item.alias]?
+      return if item instanceof Relation
       return toAttribute(item.attribute, val) if item instanceof Alias
       return toAttribute(item, val) if _.isString(item)
 
     attrXml = _.map(ctx.changedAttributes(), toXml).join("")
     asset = "<Asset>#{attrXml}</Asset>"
-    @options.post(@url(ctx.queryOptions.assetType, ctx.id), asset)
+    url = @url(ctx.queryOptions.assetType, ctx.id)
+    @options.post(url, asset)
 
-  create: (ctx, options) ->
+  sendAll: (ctx, options) ->
     throw "Unsupported context" unless isModel(ctx.constructor)
     options = options || {}
     attr = options.attrs || ctx.toJSON(options)
 
-    toAttribute = (attribute, alias) ->
-      value = attr[alias]
-      return unless value?
-      "<Attribute name=\"#{_.escape(attribute)}\" act=\"set\">#{_.escape(attr[alias])}</Attribute>"
+    toXml = (item) ->
+      return toSingleRelation(item.attribute, attr[item.alias].id) if item instanceof Relation and item.isSingle() and attr[item.alias]?
+      return if item instanceof Relation
+      return toAttribute(item.attribute, attr[item.alias]) if item instanceof Alias and attr[item.alias]?
+      return toAttribute(item, attr[item]) if _.isString(item) and attr[item]?
 
-    toSingleRelation = (relation) ->
-      value = attr[relation.alias]
-      return unless value?
-      oid = value.id
-      "<Relation name=\"#{_.escape(relation.attribute)}\" act=\"set\"><Asset idref=\"#{_.escape(oid)}\" /></Relation>"
-
-    attrXml = _(ctx.queryOptions.schema)
-      .chain()
-      .map((item) ->
-        return toSingleRelation(item) if item instanceof Relation and item.isSingle()
-        return if item instanceof Relation
-        return toAttribute(item.attribute, item.alias) if item instanceof Alias
-        return toAttribute(item, item) if _.isString(item)
-      )
-      .value()
-      .join("")
+    attrXml = _.map(ctx.queryOptions.schema, toXml).join("")
 
     asset = "<Asset>#{attrXml}</Asset>"
-
-    @options.post(@url(ctx.queryOptions.assetType, ctx.id), asset)
+    url = @url(ctx.queryOptions.assetType, ctx.id)
+    @options.post(url, asset)
       .done((data) -> ctx.id = result[1] if result = /id="(\w+:\d+):\d+"/.exec(data))
 
 ### Relation Helpers ###
