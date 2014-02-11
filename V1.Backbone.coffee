@@ -2,58 +2,55 @@ V1 = if exports? then exports else this.V1 or (this.V1 = {})
 _ = if !this?._? then (if require? then require('underscore') else throw "Unable to load/find underscore") else this._
 Backbone = if !this?.Backbone? then (if require? then require('backbone') else throw "Unable to load/find backbone") else this.Backbone
 
-defaultRetriever = undefined
-defaultPersister = undefined
+createGetterFor = (property) ->
+  defaultValue = undefined
 
-getPeristerFrom = (self, options) ->
-  persister = self.queryOptions?.persister or options?.persister or defaultPersister
-  throw "A persister is required" unless persister?
-  persister
+  getter = () ->
+    for arg in arguments
+      return arg[property] if arg? and arg[property]?
+    defaultValue
 
-syncMethods =
-  read: (model, options) ->
-    retriever = this.queryOptions?.retriever or options?.retriever or defaultRetriever
-    throw "A retriever is required" unless retriever?
+  _(getter).tap (getter) ->
+    getter.safe = () ->
+      val = getter.apply(this, arguments)
+      throw "A "+property+" is required" unless val?
+      val
 
-    xhr = retriever.into(model, options)
-      .done(options.success).fail(options.error)
+    getter.set = (val) -> defaultValue = val
 
-    model.trigger('request', model, xhr, options);
-    xhr
+defaultRetriever = createGetterFor("retriever")
+defaultPersister = createGetterFor("persister")
 
-  create: (ctx, options) ->
-    persister = getPeristerFrom(this, options)
+sync = do ->
+  methods = do ->
+    syncToPersisterMethod = (method) ->
+      (ctx, options) ->
+        persister = defaultPersister.safe(this.queryOptions, options)
 
-    xhr = persister.create(ctx, options)
-      .fail(options.error)
-      .done(options.success)
+        xhr = persister[method](ctx, options)
+          .fail(options.error)
+          .done(options.success)
 
-    ctx.trigger('request', ctx, xhr, options);
-    xhr
+        ctx.trigger('request', ctx, xhr, options);
+        xhr
 
-  delete: (ctx, options) ->
-    persister = getPeristerFrom(this, options)
+    readFromRetriever = (model, options) ->
+      retriever = defaultRetriever.safe(this.queryOptions, options)
 
-    xhr = persister.delete(ctx, options)
-      .fail(options.error)
-      .done(options.success)
+      xhr = retriever.into(model, options)
+        .done(options.success).fail(options.error)
 
-    ctx.trigger('request', ctx, xhr, options);
-    xhr
+      model.trigger('request', model, xhr, options);
+      xhr
 
-  update: (ctx, options) ->
-    persister = getPeristerFrom(this, options)
+    read: readFromRetriever
+    create: syncToPersisterMethod("create")
+    delete: syncToPersisterMethod("delete")
+    update: syncToPersisterMethod("update")
 
-    xhr = persister.update(ctx, options)
-      .fail(options.error)
-      .done(options.success)
-
-    ctx.trigger('request', ctx, xhr, options);
-    xhr
-
-sync = (method, model, options) ->
-  throw "Unsupported sync method: \"#{method}\"" unless syncMethods[method]
-  syncMethods[method].call(this, model, options)
+  (method, model, options) ->
+    throw "Unsupported sync method: \"#{method}\"" unless methods[method]
+    methods[method].call(this, model, options)
 
 isModel = (type) ->
   type::isV1 and type is Backbone.Model or type.prototype instanceof Backbone.Model
@@ -65,24 +62,24 @@ isAcceptable = (type) ->
   isModel(type) or isCollection(type)
 
 mixInTo = (cls) ->
-  cls::sync = sync
-  cls::isV1 = true
-  cls::idAttribute = "_oid" if cls::idAttribute?
-  cls
+  _(cls).tap (cls) ->
+    cls::sync = sync
+    cls::isV1 = true
+    cls::idAttribute = "_oid" if cls::idAttribute?
 
 V1.Backbone =
   setDefaultRetriever: (options) ->
-    defaultRetriever = new V1.Backbone.JsonRetriever(options)
+    defaultRetriever.set(new V1.Backbone.JsonRetriever(options))
 
-  clearDefaultRetriever: -> defaultRetriever = undefined
+  clearDefaultRetriever: -> defaultRetriever.set(undefined)
 
   setDefaultPersister: (options) ->
-    defaultPersister = new V1.Backbone.RestPersister(options)
+    defaultPersister.set(new V1.Backbone.RestPersister(options))
 
-  clearDefaultPersister: -> defaultPersister = undefined
+  clearDefaultPersister: -> defaultPersister.set(undefined)
 
   begin: (options) ->
-    options = _.extend({}, defaultRetriever?.options, options, {batch: true})
+    options = _.extend({}, defaultRetriever()?.options, options, {batch: true})
     new V1.Backbone.JsonRetriever(options)
 
   mixInTo: mixInTo
@@ -317,21 +314,23 @@ class V1.Backbone.RestPersister
 
 ### Relation Helpers ###
 
-aug = (target, action) ->
-  Dup = ->
-  Dup.prototype = target
-  _(new Dup()).tap(action || ->)
+aug = do ->
+  fn = (target, action) ->
+    Dup = ->
+    Dup.prototype = target
+    _(new Dup()).tap(action || ->)
 
-aug.extend = (target, props) ->
-  aug target, (augmentedResult) -> _.extend(augmentedResult, props)
+  _(fn).tap (fn) ->
+    fn.extend = (target, props) ->
+      aug target, (augmentedResult) -> _.extend(augmentedResult, props)
 
-aug.add = (target, property, values) ->
-  aug target, (augmentedResult) ->
-    augmentedResult[property] = if _.isArray(target[property]) then target[property].concat(values) else values
+    fn.add = (target, property, values) ->
+      aug target, (augmentedResult) ->
+        augmentedResult[property] = if _.isArray(target[property]) then target[property].concat(values) else values
 
-aug.merge = (target, props) ->
-  aug target, (augmentedResult) ->
-    _(props).each (val, key) -> target[key] = _.extend(val, target[key])
+    fn.merge = (target, props) ->
+      aug target, (augmentedResult) ->
+        _(props).each (val, key) -> target[key] = _.extend(val, target[key])
 
 class Alias
   constructor: (@attribute) ->

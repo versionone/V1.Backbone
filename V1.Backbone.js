@@ -1,5 +1,5 @@
 (function() {
-  var Alias, Backbone, Relation, V1, aug, defaultPersister, defaultRetriever, getPeristerFrom, isAcceptable, isCollection, isModel, mixInTo, sync, syncMethods, _,
+  var Alias, Backbone, Relation, V1, aug, createGetterFor, defaultPersister, defaultRetriever, isAcceptable, isCollection, isModel, mixInTo, sync, _,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -23,59 +23,72 @@
     }
   })()) : this.Backbone;
 
-  defaultRetriever = void 0;
-
-  defaultPersister = void 0;
-
-  getPeristerFrom = function(self, options) {
-    var persister, _ref;
-    persister = ((_ref = self.queryOptions) != null ? _ref.persister : void 0) || (options != null ? options.persister : void 0) || defaultPersister;
-    if (persister == null) {
-      throw "A persister is required";
-    }
-    return persister;
-  };
-
-  syncMethods = {
-    read: function(model, options) {
-      var retriever, xhr, _ref;
-      retriever = ((_ref = this.queryOptions) != null ? _ref.retriever : void 0) || (options != null ? options.retriever : void 0) || defaultRetriever;
-      if (retriever == null) {
-        throw "A retriever is required";
+  createGetterFor = function(property) {
+    var defaultValue, getter;
+    defaultValue = void 0;
+    getter = function() {
+      var arg, _i, _len;
+      for (_i = 0, _len = arguments.length; _i < _len; _i++) {
+        arg = arguments[_i];
+        if ((arg != null) && (arg[property] != null)) {
+          return arg[property];
+        }
       }
-      xhr = retriever.into(model, options).done(options.success).fail(options.error);
-      model.trigger('request', model, xhr, options);
-      return xhr;
-    },
-    create: function(ctx, options) {
-      var persister, xhr;
-      persister = getPeristerFrom(this, options);
-      xhr = persister.create(ctx, options).fail(options.error).done(options.success);
-      ctx.trigger('request', ctx, xhr, options);
-      return xhr;
-    },
-    "delete": function(ctx, options) {
-      var persister, xhr;
-      persister = getPeristerFrom(this, options);
-      xhr = persister["delete"](ctx, options).fail(options.error).done(options.success);
-      ctx.trigger('request', ctx, xhr, options);
-      return xhr;
-    },
-    update: function(ctx, options) {
-      var persister, xhr;
-      persister = getPeristerFrom(this, options);
-      xhr = persister.update(ctx, options).fail(options.error).done(options.success);
-      ctx.trigger('request', ctx, xhr, options);
-      return xhr;
-    }
+      return defaultValue;
+    };
+    return _(getter).tap(function(getter) {
+      getter.safe = function() {
+        var val;
+        val = getter.apply(this, arguments);
+        if (val == null) {
+          throw "A " + property + " is required";
+        }
+        return val;
+      };
+      return getter.set = function(val) {
+        return defaultValue = val;
+      };
+    });
   };
 
-  sync = function(method, model, options) {
-    if (!syncMethods[method]) {
-      throw "Unsupported sync method: \"" + method + "\"";
-    }
-    return syncMethods[method].call(this, model, options);
-  };
+  defaultRetriever = createGetterFor("retriever");
+
+  defaultPersister = createGetterFor("persister");
+
+  sync = (function() {
+    var methods;
+    methods = (function() {
+      var readFromRetriever, syncToPersisterMethod;
+      syncToPersisterMethod = function(method) {
+        return function(ctx, options) {
+          var persister, xhr;
+          persister = defaultPersister.safe(this.queryOptions, options);
+          xhr = persister[method](ctx, options).fail(options.error).done(options.success);
+          ctx.trigger('request', ctx, xhr, options);
+          return xhr;
+        };
+      };
+      readFromRetriever = function(model, options) {
+        var retriever, xhr;
+        retriever = defaultRetriever.safe(this.queryOptions, options);
+        xhr = retriever.into(model, options).done(options.success).fail(options.error);
+        model.trigger('request', model, xhr, options);
+        return xhr;
+      };
+      return {
+        read: readFromRetriever,
+        create: syncToPersisterMethod("create"),
+        "delete": syncToPersisterMethod("delete"),
+        update: syncToPersisterMethod("update")
+      };
+    })();
+    return function(method, model, options) {
+      if (!methods[method]) {
+        throw "Unsupported sync method: \"" + method + "\"";
+      }
+      return methods[method].call(this, model, options);
+    };
+  })();
 
   isModel = function(type) {
     return type.prototype.isV1 && type === Backbone.Model || type.prototype instanceof Backbone.Model;
@@ -90,29 +103,31 @@
   };
 
   mixInTo = function(cls) {
-    cls.prototype.sync = sync;
-    cls.prototype.isV1 = true;
-    if (cls.prototype.idAttribute != null) {
-      cls.prototype.idAttribute = "_oid";
-    }
-    return cls;
+    return _(cls).tap(function(cls) {
+      cls.prototype.sync = sync;
+      cls.prototype.isV1 = true;
+      if (cls.prototype.idAttribute != null) {
+        return cls.prototype.idAttribute = "_oid";
+      }
+    });
   };
 
   V1.Backbone = {
     setDefaultRetriever: function(options) {
-      return defaultRetriever = new V1.Backbone.JsonRetriever(options);
+      return defaultRetriever.set(new V1.Backbone.JsonRetriever(options));
     },
     clearDefaultRetriever: function() {
-      return defaultRetriever = void 0;
+      return defaultRetriever.set(void 0);
     },
     setDefaultPersister: function(options) {
-      return defaultPersister = new V1.Backbone.RestPersister(options);
+      return defaultPersister.set(new V1.Backbone.RestPersister(options));
     },
     clearDefaultPersister: function() {
-      return defaultPersister = void 0;
+      return defaultPersister.set(void 0);
     },
     begin: function(options) {
-      options = _.extend({}, defaultRetriever != null ? defaultRetriever.options : void 0, options, {
+      var _ref;
+      options = _.extend({}, (_ref = defaultRetriever()) != null ? _ref.options : void 0, options, {
         batch: true
       });
       return new V1.Backbone.JsonRetriever(options);
@@ -483,32 +498,34 @@
 
   /* Relation Helpers */
 
-  aug = function(target, action) {
-    var Dup;
-    Dup = function() {};
-    Dup.prototype = target;
-    return _(new Dup()).tap(action || function() {});
-  };
-
-  aug.extend = function(target, props) {
-    return aug(target, function(augmentedResult) {
-      return _.extend(augmentedResult, props);
+  aug = (function() {
+    var fn;
+    fn = function(target, action) {
+      var Dup;
+      Dup = function() {};
+      Dup.prototype = target;
+      return _(new Dup()).tap(action || function() {});
+    };
+    return _(fn).tap(function(fn) {
+      fn.extend = function(target, props) {
+        return aug(target, function(augmentedResult) {
+          return _.extend(augmentedResult, props);
+        });
+      };
+      fn.add = function(target, property, values) {
+        return aug(target, function(augmentedResult) {
+          return augmentedResult[property] = _.isArray(target[property]) ? target[property].concat(values) : values;
+        });
+      };
+      return fn.merge = function(target, props) {
+        return aug(target, function(augmentedResult) {
+          return _(props).each(function(val, key) {
+            return target[key] = _.extend(val, target[key]);
+          });
+        });
+      };
     });
-  };
-
-  aug.add = function(target, property, values) {
-    return aug(target, function(augmentedResult) {
-      return augmentedResult[property] = _.isArray(target[property]) ? target[property].concat(values) : values;
-    });
-  };
-
-  aug.merge = function(target, props) {
-    return aug(target, function(augmentedResult) {
-      return _(props).each(function(val, key) {
-        return target[key] = _.extend(val, target[key]);
-      });
-    });
-  };
+  })();
 
   Alias = (function() {
     function Alias(attribute) {
