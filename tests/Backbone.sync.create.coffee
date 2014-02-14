@@ -103,7 +103,7 @@ describe "Creating with `sync`", ->
       expression.save().done(done)
 
     it "can handle single-value relations", (done) ->
-      persister = createPersister expectedPost "<Asset><Relation name=\"Author\" act=\"set\"><Asset idref=\"Member:20\" /></Relation></Asset>"
+      persister = createPersister expectedPost "<Asset><Attribute name=\"Content\" act=\"set\"></Attribute><Relation name=\"Author\" act=\"set\"><Asset idref=\"Member:20\" /></Relation></Asset>"
 
       Member = V1.Backbone.Model.extend()
 

@@ -477,10 +477,10 @@
         if (item instanceof Relation) {
           return;
         }
-        if (item instanceof Alias && (attr[item.alias] != null)) {
+        if (item instanceof Alias) {
           return toAttribute(item.attribute, attr[item.alias]);
         }
-        if (_.isString(item) && (attr[item] != null)) {
+        if (_.isString(item)) {
           return toAttribute(item, attr[item]);
         }
       };

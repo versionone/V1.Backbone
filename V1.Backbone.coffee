@@ -298,8 +298,8 @@ class V1.Backbone.RestPersister
     toXml = (item) ->
       return toSingleRelation(item.attribute, attr[item.alias].id) if item instanceof Relation and item.isSingle() and attr[item.alias]?
       return if item instanceof Relation
-      return toAttribute(item.attribute, attr[item.alias]) if item instanceof Alias and attr[item.alias]?
-      return toAttribute(item, attr[item]) if _.isString(item) and attr[item]?
+      return toAttribute(item.attribute, attr[item.alias]) if item instanceof Alias
+      return toAttribute(item, attr[item]) if _.isString(item)
 
     attrXml = _.map(ctx.queryOptions.schema, toXml).join("")
 
