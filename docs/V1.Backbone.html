@@ -48,7 +48,7 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>Define some globals</p>
+              <p>Establish and import some required global objects.</p>
 
             </div>
             
@@ -65,14 +65,15 @@ Backbone = <span class="hljs-keyword">if</span> !<span class="hljs-keyword">this
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>Create a <code>property</code> for bound specified property. It returns a function which is
-invoked with one or more object. It will loop through though arguments and
-return value from the first object which has the desired property.</p>
-<p>A <code>defaultValue</code> can be specified if no matching property can be found.</p>
+              <p>Create a <code>property</code> helper bound to a specified property.</p>
+<p>This returns a function which can be invoked with one or more objects. 
+It will loop through though arguments and return value from the first object
+which has the desired property. A <code>defaultValue</code> can be specified if no matching 
+property can not be found.</p>
 <p>The returned function also provides a <code>safe()</code> getter which will throw an 
 exception if value cannot be found — rather than returning <code>defaultValue</code>.</p>
-<p>The returned function also provides a <code>set()</code> function for setting the underlying
-value.</p>
+<p>The returned function also provides a <code>set()</code> function for setting the
+underlying default value.</p>
 
             </div>
             
@@ -99,7 +100,7 @@ value.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>Create <code>properties</code> for the <code>retriever</code> and the <code>persister</code>.    </p>
+              <p>Create property getters for the <code>retriever</code> and the <code>persister</code>.</p>
 
             </div>
             
@@ -248,7 +249,7 @@ extensions at a later time.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
-              <p>Set the global default retriever options.</p>
+              <p>Set the <em>global</em> default retriever options.</p>
 
             </div>
             
@@ -264,7 +265,7 @@ extensions at a later time.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
-              <p>Clear the global default retriever — useful for test contexts.</p>
+              <p>Clear the <em>global</em> default retriever — useful for test contexts.</p>
 
             </div>
             
@@ -279,7 +280,7 @@ extensions at a later time.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
-              <p>Set the global default persister options.</p>
+              <p>Set the <em>global</em> default persister options.</p>
 
             </div>
             
@@ -295,7 +296,7 @@ extensions at a later time.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
-              <p>Clear the global default persister — useful for test contexts.    </p>
+              <p>Clear the <em>global</em> default persister — useful for test contexts.    </p>
 
             </div>
             
@@ -312,19 +313,9 @@ extensions at a later time.</p>
               </div>
               <p>Begin a batch transaction. You can queue up multiple queries during one HTTP request
 with this method.</p>
-<pre><code class="lang-js"><span class="hljs-keyword">var</span> members = <span class="hljs-keyword">new</span> Members(); 
-<span class="hljs-keyword">var</span> spaces = <span class="hljs-keyword">new</span> ExpressionSpaces();
-
-batch = V1.Backbone.begin()
-batch.fetch(members)
-batch.fetch(spaces)
-batch.exec().done(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> {</span>
-  <span class="hljs-comment">// `members` and `spaces` are ready to use</span>
-});
-</code></pre>
 <blockquote>
 <p>Note: Be sure to remember to wait for the deferred object to be
-resolved before attempting to use the data</p>
+resolved before attempting to use the data.</p>
 </blockquote>
 
             </div>
@@ -772,7 +763,7 @@ resolved before attempting to use the data</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
-              <p>Export a simple constructor as <code>V1.Backbone.alias</code>    </p>
+              <p>Export a simple constructor as <code>V1.Backbone.relation</code>    </p>
 
             </div>
             
