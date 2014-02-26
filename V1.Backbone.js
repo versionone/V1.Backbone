@@ -1,5 +1,5 @@
 (function() {
-  var Alias, Backbone, Relation, V1, aug, createGetterFor, defaultPersister, defaultRetriever, isAcceptable, isCollection, isModel, mixInTo, sync, _,
+  var Alias, Backbone, Relation, V1, aug, createProperty, defaultPersister, defaultRetriever, isAcceptable, isCollection, isModel, mixInTo, sync, _,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -23,14 +23,13 @@
     }
   })()) : this.Backbone;
 
-  createGetterFor = function(property) {
-    var defaultValue, getter;
-    defaultValue = void 0;
+  createProperty = function(property, defaultValue) {
+    var getter;
     getter = function() {
       var arg, _i, _len;
       for (_i = 0, _len = arguments.length; _i < _len; _i++) {
         arg = arguments[_i];
-        if ((arg != null) && (arg[property] != null)) {
+        if ((arg != null ? arg[property] : void 0) != null) {
           return arg[property];
         }
       }
@@ -51,9 +50,9 @@
     });
   };
 
-  defaultRetriever = createGetterFor("retriever");
+  defaultRetriever = createProperty("retriever");
 
-  defaultPersister = createGetterFor("persister");
+  defaultPersister = createProperty("persister");
 
   sync = (function() {
     var methods;
@@ -91,11 +90,11 @@
   })();
 
   isModel = function(type) {
-    return type.prototype.isV1 && type === Backbone.Model || type.prototype instanceof Backbone.Model;
+    return type.prototype.isV1 && (type === Backbone.Model || type.prototype instanceof Backbone.Model);
   };
 
   isCollection = function(type) {
-    return type.prototype.isV1 && type === Backbone.Collection || type.prototype instanceof Backbone.Collection;
+    return type.prototype.isV1 && (type === Backbone.Collection || type.prototype instanceof Backbone.Collection);
   };
 
   isAcceptable = function(type) {
@@ -498,9 +497,6 @@
     return RestPersister;
 
   })();
-
-
-  /* Relation Helpers */
 
   aug = (function() {
     var fn;

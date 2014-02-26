@@ -4,11 +4,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-coffee');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-docco');
 
   grunt.initConfig({
     watch: {
       scripts: {
-        files: ['V1.Backbone.coffee', 'tests/**/*.coffee'],
+        files: ['V1.Backbone.litcoffee', 'tests/**/*.coffee'],
         tasks: ["coffee:compile", 'uglify', "mochaTest"],
         options: { spawn: true }
       }
@@ -17,7 +18,7 @@ module.exports = function(grunt) {
     coffee: {
       compile: {
         files: {
-          'V1.Backbone.js': 'V1.Backbone.coffee'
+          'V1.Backbone.js': 'V1.Backbone.litcoffee'
         }
       }
     },
@@ -38,8 +39,16 @@ module.exports = function(grunt) {
         },
         src: ['tests/**/*.coffee']
       }
-    }
+    },
+    docco: {
+      main: {
+        src: ['V1.Backbone.litcoffee'],
+        options: {
+          output: 'docs/'
+        }
+      }
+    },    
   });
 
-  grunt.registerTask('default', ["coffee:compile", 'uglify', "mochaTest"]);
+  grunt.registerTask('default', ["coffee:compile", 'uglify', "mochaTest", "docco"]);
 };
