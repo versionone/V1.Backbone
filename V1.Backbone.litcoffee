@@ -6,23 +6,24 @@ A simple backbone adapter for V1 queries.
 Base Setup
 ----------
 
-Define some globals
+Establish and import some required global objects.
 
     V1 = if exports? then exports else this.V1 or (this.V1 = {})
     _ = if !this?._? then (if require? then require('underscore') else throw "Unable to load/find underscore") else this._
     Backbone = if !this?.Backbone? then (if require? then require('backbone') else throw "Unable to load/find backbone") else this.Backbone
     
-Create a `property` for bound specified property. It returns a function which is
-invoked with one or more object. It will loop through though arguments and
-return value from the first object which has the desired property.
+Create a `property` helper bound to a specified property.
 
-A `defaultValue` can be specified if no matching property can be found.
+This returns a function which can be invoked with one or more objects. 
+It will loop through though arguments and return value from the first object
+which has the desired property. A `defaultValue` can be specified if no matching 
+property can not be found.
 
 The returned function also provides a `safe()` getter which will throw an 
 exception if value cannot be found -- rather than returning `defaultValue`.
 
-The returned function also provides a `set()` function for setting the underlying
-value.
+The returned function also provides a `set()` function for setting the
+underlying default value.
 
     createProperty = (property, defaultValue) ->
       getter = () ->
@@ -38,7 +39,7 @@ value.
     
         getter.set = (val) -> defaultValue = val
     
-Create `properties` for the `retriever` and the `persister`.    
+Create property getters for the `retriever` and the `persister`.
     
     defaultRetriever = createProperty("retriever")
     defaultPersister = createProperty("persister")
@@ -112,41 +113,31 @@ This is the main `V1.Backbone` namespace.
 
     V1.Backbone =
     
-Set the global default retriever options.
+Set the *global* default retriever options.
 
       setDefaultRetriever: (options) ->
         defaultRetriever.set(new V1.Backbone.JsonRetriever(options))
     
-Clear the global default retriever -- useful for test contexts.
+Clear the *global* default retriever -- useful for test contexts.
 
       clearDefaultRetriever: -> defaultRetriever.set(undefined)
 
-Set the global default persister options.
+Set the *global* default persister options.
 
       setDefaultPersister: (options) ->
         defaultPersister.set(new V1.Backbone.RestPersister(options))
     
-Clear the global default persister -- useful for test contexts.    
+Clear the *global* default persister -- useful for test contexts.    
     
       clearDefaultPersister: -> defaultPersister.set(undefined)
 
 Begin a batch transaction. You can queue up multiple queries during one HTTP request
 with this method.
 
-```js
-var members = new Members(); 
-var spaces = new ExpressionSpaces();
 
-batch = V1.Backbone.begin()
-batch.fetch(members)
-batch.fetch(spaces)
-batch.exec().done(function() {
-  // `members` and `spaces` are ready to use
-});
-```
 
 > Note: Be sure to remember to wait for the deferred object to be
-> resolved before attempting to use the data
+resolved before attempting to use the data.
 
       begin: (options) ->
         options = _.extend({}, defaultRetriever()?.options, options, {batch: true})
@@ -448,6 +439,6 @@ Relation Helper
       addWith: (newWith) ->
         aug.merge(this, {newWith})
     
-Export a simple constructor as `V1.Backbone.alias`    
+Export a simple constructor as `V1.Backbone.relation`    
     
     V1.Backbone.relation = (attribute) -> new Relation(attribute)

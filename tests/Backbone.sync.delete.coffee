@@ -22,6 +22,5 @@ describe "Deleteing model", ->
       persister = new V1.Backbone.RestPersister(persisterOptions)
 
       Expression = getModel(persister)
-      model = new Expression()
-      model.id = "Expression:1234"
+      model = new Expression(_oid:"Expression:1234")
       model.destroy().done(done)
