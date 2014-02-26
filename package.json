@@ -1,6 +1,6 @@
 {
   "name": "Backbone.V1",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "a simple backbone adapter for V1 queries",
   "repository": {
     "type": "git",
@@ -13,7 +13,6 @@
     }
   ],
   "dependencies": {
-    "coffee-script": "~1.7.1",
     "backbone": "*",
     "underscore": "*"
   },
@@ -23,6 +22,7 @@
     "sinon": "*",
     "Deferred": "*",
     "grunt": "~0.4.2",
+    "coffee-script": "~1.7.1",
     "grunt-mocha-test": "~0.9.0",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-contrib-coffee": "~0.10.0",
