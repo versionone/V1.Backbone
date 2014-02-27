@@ -150,7 +150,7 @@ Export the `mixInTo` helper.
       Model: mixInTo Backbone.Model.extend()
       Collection: mixInTo Backbone.Collection.extend()
     
-Retrival
+Retrieval
 --------
 
     class V1.Backbone.JsonRetriever
