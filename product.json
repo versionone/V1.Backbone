@@ -14,10 +14,20 @@
     },
     "linksSection": [
         {
+            "type": "source",
+            "title": "GitHub Project for Source Code and Issues",
+            "href": "https://github.com/versionone/V1.Backbone"
+        },
+        {
             "type": "documentation",
-            "title": "Documentation",
-            "href": "http://versionone.github.io/VersionOne.SDK.Backbone/index.html"
-        }
+            "title": "README for Developers",
+            "href": "https://github.com/versionone/V1.Backbone/blob/master/README.md"
+        },
+        {
+            "type": "license",
+            "title": "Modified BSD (3 clause) License",
+            "href": "https://github.com/versionone/V1.Backbone/blob/master/LICENSE.md"
+        }        
     ],
     "updatesSection": {
         "updates": [
@@ -31,16 +41,16 @@
         ],
         "qualityBands": [
             "seed": {
-                "shortDescription": "The initial idea of a product. May not be stable code.",
-                "href": "https://github.com/versionone/VersionOne.SDK.Backbone/blob/master/CONTRIBUTING.md#seed"
+                "shortDescription": "Early access build. Use with caution.",
+                "href": "https://github.com/versionone/V1.Backbone/blob/master/CONTRIBUTING.md#seed"
             },
             "sapling": {
                 "shortDescription": "The product is undergoing rapid growth. The code works but expect major changes.",
-                "href": "https://github.com/versionone/VersionOne.SDK.Backbone/blob/master/CONTRIBUTING.md#sapling"
+                "href": "https://github.com/versionone/V1.Backbone/blob/master/CONTRIBUTING.md#sapling"
             },
             "mature": {
                 "shortDescription": "The product is stable. The code will continue to evolve with minimum breaking changes.",
-                "href": "https://github.com/versionone/VersionOne.SDK.Backbone/blob/master/CONTRIBUTING.md#mature"
+                "href": "https://github.com/versionone/V1.Backbone/blob/master/CONTRIBUTING.md#mature"
             }
         ]
     },
