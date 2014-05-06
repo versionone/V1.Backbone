@@ -42,11 +42,11 @@ Backbone = <span class="hljs-keyword">if</span> !<span class="hljs-keyword">this
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
               <p>Create a <code>property</code> helper bound to a specified property.</p>
-<p>This returns a function which can be invoked with one or more objects. 
+<p>This returns a function which can be invoked with one or more objects.
 It will loop through though arguments and return value from the first object
-which has the desired property. A <code>defaultValue</code> can be specified if no matching 
+which has the desired property. A <code>defaultValue</code> can be specified if no matching
 property can not be found.</p>
-<p>The returned function also provides a <code>safe()</code> getter which will throw an 
+<p>The returned function also provides a <code>safe()</code> getter which will throw an
 exception if value cannot be found — rather than returning <code>defaultValue</code>.</p>
 <p>The returned function also provides a <code>set()</code> function for setting the
 underlying default value.</p>
@@ -126,7 +126,7 @@ method proxies most of its work into the configured <code>retriever</code> and
     <span class="hljs-attribute">update</span>: syncToPersisterMethod(<span class="hljs-string">"send"</span>)
     <span class="hljs-attribute">delete</span>: syncToPersisterMethod(<span class="hljs-string">"delete"</span>)
 
-  
+
   <span class="hljs-function"><span class="hljs-params">(method, model, options)</span> -&gt;</span>
     <span class="hljs-keyword">throw</span> <span class="hljs-string">"Unsupported sync method: \"<span class="hljs-subst">#{method}</span>\""</span> <span class="hljs-keyword">unless</span> methods[method]
     methods[method].call(<span class="hljs-keyword">this</span>, model, options)</pre></div></div>
@@ -186,7 +186,7 @@ extensions at a later time.</p>
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
               <h2 id="main">Main</h2>
-<p>This is the main <code>V1.Backbone</code> namespace. </p>
+<p>This is the main <code>V1.Backbone</code> namespace.</p>
 
             </div>
             
@@ -248,7 +248,7 @@ extensions at a later time.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
-              <p>Clear the <em>global</em> default persister — useful for test contexts.    </p>
+              <p>Clear the <em>global</em> default persister — useful for test contexts.</p>
 
             </div>
             
@@ -285,12 +285,12 @@ resolved before attempting to use the data.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
-              <p>Export the <code>mixInTo</code> helper.    </p>
+              <p>Export the <code>mixInTo</code> helper.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">mixInTo</span>: mixInTo
-  
+
   <span class="hljs-attribute">Model</span>: mixInTo Backbone.Model.extend()
   <span class="hljs-attribute">Collection</span>: mixInTo Backbone.Collection.extend()</pre></div></div>
             
@@ -660,7 +660,7 @@ resolved before attempting to use the data.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
-              <p>Export a simple constructor as <code>V1.Backbone.relation</code>    </p>
+              <p>Export a simple constructor as <code>V1.Backbone.relation</code></p>
 
             </div>
             
