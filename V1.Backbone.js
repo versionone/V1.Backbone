@@ -166,7 +166,9 @@
       query = {
         from: attribute ? "" + attribute + " as " + assetType : assetType
       };
-      addSorts(queryOptions.sort, query);
+      if (isCollection(type) && (type.prototype.queryOptions != null)) {
+        addSorts(type.prototype.queryOptions.sort, query);
+      }
       addSelectTokens(queryOptions.schema, query);
       addFilterTokens(type, query);
       addFindInTokens(type, query);

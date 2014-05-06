@@ -326,7 +326,7 @@ resolved before attempting to use the data.</p>
 
     query = <span class="hljs-attribute">from</span>: <span class="hljs-keyword">if</span> attribute <span class="hljs-keyword">then</span> <span class="hljs-string">"<span class="hljs-subst">#{attribute}</span> as <span class="hljs-subst">#{assetType}</span>"</span> <span class="hljs-keyword">else</span> assetType
 
-    addSorts(queryOptions.sort, query)
+    addSorts(<span class="hljs-attribute">type</span>::queryOptions.sort, query) <span class="hljs-keyword">if</span> isCollection(type) <span class="hljs-keyword">and</span> <span class="hljs-attribute">type</span>::queryOptions?
     addSelectTokens(queryOptions.schema, query)
     addFilterTokens(type, query)
     addFindInTokens(type, query)

@@ -8,10 +8,11 @@ describe "Fetching a sorted collection", ->
 
   it "adds the sort option to the query from queryOptions", (done) ->
     Members = V1.Backbone.Collection.extend
+      queryOptions:
+        sort: ["Name"]
       model: V1.Backbone.Model.extend
         queryOptions:
           assetType: "Member"
-          sort: ["Name"]
           schema: [ "Name" ]
 
     retrieverOptions =
@@ -31,10 +32,11 @@ describe "Fetching a sorted collection", ->
   it "it respects the sort order", (done) ->
 
     Iterations = V1.Backbone.Collection.extend
+      queryOptions:
+        sort: ["EndDate"]
       model: V1.Backbone.Model.extend
         queryOptions:
           assetType: "Timebox"
-          sort: ["EndDate"]
           schema: ["Name"]
 
     retrieverOptions =

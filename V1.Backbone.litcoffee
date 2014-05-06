@@ -172,7 +172,7 @@ Retrieval
 
         query = from: if attribute then "#{attribute} as #{assetType}" else assetType
 
-        addSorts(queryOptions.sort, query)
+        addSorts(type::queryOptions.sort, query) if isCollection(type) and type::queryOptions?
         addSelectTokens(queryOptions.schema, query)
         addFilterTokens(type, query)
         addFindInTokens(type, query)
