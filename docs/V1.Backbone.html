@@ -325,6 +325,8 @@ resolved before attempting to use the data.</p>
     assetType = queryOptions.assetType <span class="hljs-keyword">or</span> attribute
 
     query = <span class="hljs-attribute">from</span>: <span class="hljs-keyword">if</span> attribute <span class="hljs-keyword">then</span> <span class="hljs-string">"<span class="hljs-subst">#{attribute}</span> as <span class="hljs-subst">#{assetType}</span>"</span> <span class="hljs-keyword">else</span> assetType
+
+    addSorts(queryOptions.sort, query)
     addSelectTokens(queryOptions.schema, query)
     addFilterTokens(type, query)
     addFindInTokens(type, query)
@@ -341,6 +343,9 @@ resolved before attempting to use the data.</p>
       newArray = <span class="hljs-keyword">if</span> _.isString(newArray) <span class="hljs-keyword">then</span> [newArray] <span class="hljs-keyword">else</span> newArray
       set = set.concat(newArray) <span class="hljs-keyword">if</span> _.isArray(newArray) <span class="hljs-keyword">and</span> newArray.length &gt; <span class="hljs-number">0</span>
       set
+
+  <span class="hljs-function"><span class="hljs-title">addSorts</span> = <span class="hljs-params">(sort, query)</span> -&gt;</span>
+    query.sort = sort <span class="hljs-keyword">if</span> sort?
 
   <span class="hljs-function"><span class="hljs-title">addFilterTokens</span> = <span class="hljs-params">(type, query)</span> -&gt;</span>
     filter = []

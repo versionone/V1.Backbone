@@ -137,7 +137,7 @@
   };
 
   V1.Backbone.JsonRetriever = (function() {
-    var addFilterTokens, addFindInTokens, addRelation, addSelectTokens, aliasRows, defaultOptions, getQueryFor, prepareResultFor, safeConcat, validQueryOptions;
+    var addFilterTokens, addFindInTokens, addRelation, addSelectTokens, addSorts, aliasRows, defaultOptions, getQueryFor, prepareResultFor, safeConcat, validQueryOptions;
 
     defaultOptions = {
       fetch: function() {
@@ -166,6 +166,7 @@
       query = {
         from: attribute ? "" + attribute + " as " + assetType : assetType
       };
+      addSorts(queryOptions.sort, query);
       addSelectTokens(queryOptions.schema, query);
       addFilterTokens(type, query);
       addFindInTokens(type, query);
@@ -189,6 +190,12 @@
         set = set.concat(newArray);
       }
       return set;
+    };
+
+    addSorts = function(sort, query) {
+      if (sort != null) {
+        return query.sort = sort;
+      }
     };
 
     addFilterTokens = function(type, query) {

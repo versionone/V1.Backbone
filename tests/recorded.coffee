@@ -1297,3 +1297,121 @@ registerString '/VersionOne/rest-1.v1/Data/Expression', '<Asset></Asset>', '''
   <Attribute name="Content">Hello</Attribute>
 </Asset>
 '''
+
+registerJson 'url1', '{"from":"Timebox","sort":["EndDate"],"select":["Name"]}', '''
+[
+  [
+    {
+      "_oid": "Timebox:1282",
+      "Name": "Sprint 1"
+    },
+    {
+      "_oid": "Timebox:1738",
+      "Name": "Kanban"
+    },
+    {
+      "_oid": "Timebox:1666",
+      "Name": "Sprint 4"
+    },
+    {
+      "_oid": "Timebox:1469",
+      "Name": "Sprint 2"
+    },
+    {
+      "_oid": "Timebox:1581",
+      "Name": "Sprint 3"
+    },
+    {
+      "_oid": "Timebox:1821",
+      "Name": "Sprint 7"
+    },
+    {
+      "_oid": "Timebox:1272",
+      "Name": "Month 1"
+    },
+    {
+      "_oid": "Timebox:1552",
+      "Name": "Month 2"
+    },
+    {
+      "_oid": "Timebox:1775",
+      "Name": "Sprint 5"
+    },
+    {
+      "_oid": "Timebox:1812",
+      "Name": "Sprint 6"
+    },
+    {
+      "_oid": "Timebox:1822",
+      "Name": "Month 3"
+    },
+    {
+      "_oid": "Timebox:2060",
+      "Name": "Iteration 5"
+    },
+    {
+      "_oid": "Timebox:2058",
+      "Name": "Iteration 4"
+    }
+  ]
+]
+'''
+
+registerJson 'url2', '{"from":"Timebox","sort":["EndDate"],"select":["Name"]}', '''
+[
+  [
+    {
+      "_oid": "Timebox:2060",
+      "Name": "Iteration 5"
+    },
+    {
+      "_oid": "Timebox:1282",
+      "Name": "Sprint 1"
+    },
+    {
+      "_oid": "Timebox:1272",
+      "Name": "Month 1"
+    },
+    {
+      "_oid": "Timebox:1469",
+      "Name": "Sprint 2"
+    },
+    {
+      "_oid": "Timebox:1581",
+      "Name": "Sprint 3"
+    },
+    {
+      "_oid": "Timebox:1666",
+      "Name": "Sprint 4"
+    },
+    {
+      "_oid": "Timebox:1552",
+      "Name": "Month 2"
+    },
+    {
+      "_oid": "Timebox:1775",
+      "Name": "Sprint 5"
+    },
+    {
+      "_oid": "Timebox:1738",
+      "Name": "Kanban"
+    },
+    {
+      "_oid": "Timebox:1812",
+      "Name": "Sprint 6"
+    },
+    {
+      "_oid": "Timebox:1822",
+      "Name": "Month 3"
+    },
+    {
+      "_oid": "Timebox:1821",
+      "Name": "Sprint 7"
+    },
+    {
+      "_oid": "Timebox:2058",
+      "Name": "Iteration 4"
+    }
+  ]
+]
+'''

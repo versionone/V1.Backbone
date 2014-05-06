@@ -171,6 +171,8 @@ Retrieval
         assetType = queryOptions.assetType or attribute
     
         query = from: if attribute then "#{attribute} as #{assetType}" else assetType
+
+        addSorts(queryOptions.sort, query)
         addSelectTokens(queryOptions.schema, query)
         addFilterTokens(type, query)
         addFindInTokens(type, query)
@@ -188,6 +190,9 @@ Retrieval
           set = set.concat(newArray) if _.isArray(newArray) and newArray.length > 0
           set
     
+      addSorts = (sort, query) ->
+        query.sort = sort if sort?
+
       addFilterTokens = (type, query) ->
         filter = []
         filter = safeConcat(filter, type::queryOptions?.filter)
