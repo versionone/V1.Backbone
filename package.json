@@ -28,5 +28,6 @@
     "grunt-contrib-coffee": "~0.10.0",
     "grunt-contrib-uglify": "~0.3.2",
     "grunt-docco": "~0.3.3"
-  }
+  },
+  "main": "V1.Backbone.js"
 }
