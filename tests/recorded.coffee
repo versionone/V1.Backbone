@@ -1,4 +1,4 @@
-deferred = require('Deferred')
+deferred = require('JQDeferred')
 
 module.exports = (url, data) ->
   response = fetch(url,data)

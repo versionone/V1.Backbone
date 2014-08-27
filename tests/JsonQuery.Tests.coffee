@@ -6,7 +6,7 @@ expect = require('chai').expect
 Backbone = require('backbone')
 recorded = require('./recorded')
 spy = require('sinon').spy
-deferred = require('Deferred')
+deferred = require('JQDeferred')
 
 describe 'V1.Backbone.JsonRetriever', ->
 

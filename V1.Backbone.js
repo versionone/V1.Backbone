@@ -252,7 +252,7 @@
     }
 
     JsonRetriever.prototype["for"] = function(type) {
-      return this.batchInto(type, getQueryFor(type), this.queries.length).pipe(function(aliasedRows) {
+      return this.batchInto(type, getQueryFor(type), this.queries.length).then(function(aliasedRows) {
         return new type(aliasedRows);
       });
     };
@@ -287,7 +287,7 @@
       }
       data = JSON.stringify(query);
       xhr = this.options.fetch(this.options.url, data);
-      deferred = xhr.pipe(function(data) {
+      deferred = xhr.then(function(data) {
         return prepareResultFor(data[0], type);
       });
       if ((xhr.abort != null) && (deferred.abort == null)) {
@@ -305,7 +305,7 @@
 
     JsonRetriever.prototype.batchInto = function(type, query, index) {
       this.queries[index] = query;
-      return this.findOrCreateBatch().pipe(function(results) {
+      return this.findOrCreateBatch().then(function(results) {
         return prepareResultFor(results[index], type);
       });
     };
@@ -400,9 +400,6 @@
           data: data,
           dataType: "text"
         });
-      },
-      defer: function() {
-        return $.Deferred.apply($, arguments);
       }
     };
 

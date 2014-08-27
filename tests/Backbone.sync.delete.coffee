@@ -1,6 +1,6 @@
 V1 = require('../V1.Backbone')
 expect = require('chai').expect
-deferred = require('Deferred')
+deferred = require('JQDeferred')
 
 describe "Deleteing model", ->
 

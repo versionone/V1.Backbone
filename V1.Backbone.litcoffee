@@ -223,7 +223,7 @@ Retrieval
 
       for: (type) ->
         @batchInto(type, getQueryFor(type), @queries.length)
-          .pipe (aliasedRows) -> new type(aliasedRows)
+          .then (aliasedRows) -> new type(aliasedRows)
 
       fetch: (instance, options) ->
         options = _.extend({}, options, { retriever: this })
@@ -247,7 +247,7 @@ Retrieval
 
         xhr = @options.fetch(@options.url, data)
 
-        deferred = xhr.pipe (data) -> prepareResultFor(data[0], type)
+        deferred = xhr.then (data) -> prepareResultFor(data[0], type)
         deferred.abort = _.bind(xhr.abort, xhr) if xhr.abort? and !deferred.abort?
 
         deferred
@@ -261,7 +261,7 @@ Retrieval
         @queries[index] = query
 
         @findOrCreateBatch()
-          .pipe((results) -> prepareResultFor(results[index], type))
+          .then((results) -> prepareResultFor(results[index], type))
 
       exec: ->
         return unless @currentBatch
@@ -327,8 +327,6 @@ Persistance
             url: url,
             data: data,
             dataType: "text"
-
-        defer: () -> $.Deferred.apply($, arguments)
 
       url: (assetType, oid) =>
         oidParts = if oid? then oid.split(":") else []

@@ -1,7 +1,7 @@
 V1 = require('../V1.Backbone')
 expect = require('chai').expect
 recorded = require('./recorded')
-deferred = require('Deferred')
+deferred = require('JQDeferred')
 spy = require('sinon').spy
 
 makeFetcher = (queryChecker) ->

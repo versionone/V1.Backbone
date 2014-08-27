@@ -1,7 +1,7 @@
 V1 = require('../V1.Backbone')
 expect = require('chai').expect
 recorded = require('./recorded')
-deferred = require('Deferred')
+deferred = require('JQDeferred')
 
 alias = V1.Backbone.alias
 relation = V1.Backbone.relation
