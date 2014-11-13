@@ -53,19 +53,19 @@ underlying default value.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">createProperty</span> = <span class="hljs-params">(property, defaultValue)</span> -&gt;</span><span class="hljs-function">
-  <span class="hljs-title">getter</span> = <span class="hljs-params">()</span> -&gt;</span>
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">createProperty</span> = <span class="hljs-params">(property, defaultValue)</span> -&gt;</span>
+  <span class="hljs-function"><span class="hljs-title">getter</span> = <span class="hljs-params">()</span> -&gt;</span>
     <span class="hljs-keyword">for</span> arg <span class="hljs-keyword">in</span> arguments
       <span class="hljs-keyword">return</span> arg[property] <span class="hljs-keyword">if</span> arg?[property]?
     defaultValue
 
-  _(getter).tap <span class="hljs-function"><span class="hljs-params">(getter)</span> -&gt;</span>
-    getter.s<span class="hljs-function"><span class="hljs-title">afe</span> = <span class="hljs-params">()</span> -&gt;</span>
+  _<span class="hljs-function"><span class="hljs-params">(getter)</span>.<span class="hljs-title">tap</span> <span class="hljs-params">(getter)</span> -&gt;</span>
+    getter.<span class="hljs-function"><span class="hljs-title">safe</span> = <span class="hljs-params">()</span> -&gt;</span>
       val = getter.apply(<span class="hljs-keyword">this</span>, arguments)
       <span class="hljs-keyword">throw</span> <span class="hljs-string">"A "</span>+property+<span class="hljs-string">" is required"</span> <span class="hljs-keyword">unless</span> val?
       val
 
-    getter.s<span class="hljs-function"><span class="hljs-title">et</span> = <span class="hljs-params">(val)</span> -&gt;</span> defaultValue = val</pre></div></div>
+    getter.<span class="hljs-function"><span class="hljs-title">set</span> = <span class="hljs-params">(val)</span> -&gt;</span> defaultValue = val</pre></div></div>
             
         </li>
         
@@ -99,10 +99,10 @@ method proxies most of its work into the configured <code>retriever</code> and
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>sync = <span class="hljs-keyword">do</span> <span class="hljs-function">-&gt;</span>
-  methods = <span class="hljs-keyword">do</span> <span class="hljs-function">-&gt;</span><span class="hljs-function">
-    <span class="hljs-title">syncToPersisterMethod</span> = <span class="hljs-params">(method)</span> -&gt;</span><span class="hljs-function">
-      <span class="hljs-params">(ctx, options)</span> -&gt;</span>
+            <div class="content"><div class='highlight'><pre>sync = <span class="hljs-keyword">do</span><span class="hljs-function"> -&gt;</span>
+  methods = <span class="hljs-keyword">do</span><span class="hljs-function"> -&gt;</span>
+    <span class="hljs-function"><span class="hljs-title">syncToPersisterMethod</span> = <span class="hljs-params">(method)</span> -&gt;</span>
+      <span class="hljs-function"><span class="hljs-params">(ctx, options)</span> -&gt;</span>
         persister = defaultPersister.safe(<span class="hljs-keyword">this</span>.queryOptions, options)
 
         xhr = persister[method](ctx, options)
@@ -110,9 +110,9 @@ method proxies most of its work into the configured <code>retriever</code> and
           .done(options.success)
 
         ctx.trigger(<span class="hljs-string">'request'</span>, ctx, xhr, options);
-        xhr<span class="hljs-function">
+        xhr
 
-    <span class="hljs-title">readFromRetriever</span> = <span class="hljs-params">(model, options)</span> -&gt;</span>
+    <span class="hljs-function"><span class="hljs-title">readFromRetriever</span> = <span class="hljs-params">(model, options)</span> -&gt;</span>
       retriever = defaultRetriever.safe(<span class="hljs-keyword">this</span>.queryOptions, options)
 
       xhr = retriever.into(model, options)
@@ -124,10 +124,11 @@ method proxies most of its work into the configured <code>retriever</code> and
     <span class="hljs-attribute">read</span>: readFromRetriever
     <span class="hljs-attribute">create</span>: syncToPersisterMethod(<span class="hljs-string">"send"</span>)
     <span class="hljs-attribute">update</span>: syncToPersisterMethod(<span class="hljs-string">"send"</span>)
-    <span class="hljs-attribute">delete</span>: syncToPersisterMethod(<span class="hljs-string">"delete"</span>)<span class="hljs-function">
+    <span class="hljs-attribute">patch</span>: syncToPersisterMethod(<span class="hljs-string">"send"</span>)
+    <span class="hljs-attribute">delete</span>: syncToPersisterMethod(<span class="hljs-string">"delete"</span>)
 
 
-  <span class="hljs-params">(method, model, options)</span> -&gt;</span>
+  <span class="hljs-function"><span class="hljs-params">(method, model, options)</span> -&gt;</span>
     <span class="hljs-keyword">throw</span> <span class="hljs-string">"Unsupported sync method: \"<span class="hljs-subst">#{method}</span>\""</span> <span class="hljs-keyword">unless</span> methods[method]
     methods[method].call(<span class="hljs-keyword">this</span>, model, options)</pre></div></div>
             
@@ -146,12 +147,12 @@ method proxies most of its work into the configured <code>retriever</code> and
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">isModel</span> = <span class="hljs-params">(type)</span> -&gt;</span>
-  <span class="hljs-attribute">type</span>::isV1 <span class="hljs-keyword">and</span> (type <span class="hljs-keyword">is</span> Backbone.Model <span class="hljs-keyword">or</span> type.prototype <span class="hljs-keyword">instanceof</span> Backbone.Model)<span class="hljs-function">
+  <span class="hljs-attribute">type</span>::isV1 <span class="hljs-keyword">and</span> (type <span class="hljs-keyword">is</span> Backbone.Model <span class="hljs-keyword">or</span> type.prototype <span class="hljs-keyword">instanceof</span> Backbone.Model)
 
-<span class="hljs-title">isCollection</span> = <span class="hljs-params">(type)</span> -&gt;</span>
-  <span class="hljs-attribute">type</span>::isV1 <span class="hljs-keyword">and</span> (type <span class="hljs-keyword">is</span> Backbone.Collection <span class="hljs-keyword">or</span> type.prototype <span class="hljs-keyword">instanceof</span> Backbone.Collection)<span class="hljs-function">
+<span class="hljs-function"><span class="hljs-title">isCollection</span> = <span class="hljs-params">(type)</span> -&gt;</span>
+  <span class="hljs-attribute">type</span>::isV1 <span class="hljs-keyword">and</span> (type <span class="hljs-keyword">is</span> Backbone.Collection <span class="hljs-keyword">or</span> type.prototype <span class="hljs-keyword">instanceof</span> Backbone.Collection)
 
-<span class="hljs-title">isAcceptable</span> = <span class="hljs-params">(type)</span> -&gt;</span>
+<span class="hljs-function"><span class="hljs-title">isAcceptable</span> = <span class="hljs-params">(type)</span> -&gt;</span>
   isModel(type) <span class="hljs-keyword">or</span> isCollection(type)</pre></div></div>
             
         </li>
@@ -171,7 +172,7 @@ extensions at a later time.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">mixInTo</span> = <span class="hljs-params">(cls)</span> -&gt;</span>
-  _(cls).tap <span class="hljs-function"><span class="hljs-params">(cls)</span> -&gt;</span>
+  _<span class="hljs-function"><span class="hljs-params">(cls)</span>.<span class="hljs-title">tap</span> <span class="hljs-params">(cls)</span> -&gt;</span>
     <span class="hljs-attribute">cls</span>::sync = sync
     <span class="hljs-attribute">cls</span>::isV1 = <span class="hljs-literal">true</span>
     <span class="hljs-attribute">cls</span>::idAttribute = <span class="hljs-string">"_oid"</span> <span class="hljs-keyword">if</span> <span class="hljs-attribute">cls</span>::idAttribute?</pre></div></div>
@@ -312,9 +313,9 @@ resolved before attempting to use the data.</p>
     <span class="hljs-attribute">fetch</span>: <span class="hljs-function"><span class="hljs-params">()</span> -&gt;</span> $.post.apply($, arguments)
     <span class="hljs-attribute">defer</span>: <span class="hljs-function"><span class="hljs-params">()</span> -&gt;</span> $.Deferred.apply($, arguments)
 
-  validQueryOptions = [<span class="hljs-string">"find"</span>, <span class="hljs-string">"filter"</span>, <span class="hljs-string">"where"</span>, <span class="hljs-string">"with"</span>]<span class="hljs-function">
+  validQueryOptions = [<span class="hljs-string">"find"</span>, <span class="hljs-string">"filter"</span>, <span class="hljs-string">"where"</span>, <span class="hljs-string">"with"</span>]
 
-  <span class="hljs-title">getQueryFor</span> = <span class="hljs-params">(type, attribute)</span> -&gt;</span>
+  <span class="hljs-function"><span class="hljs-title">getQueryFor</span> = <span class="hljs-params">(type, attribute)</span> -&gt;</span>
     <span class="hljs-keyword">throw</span> <span class="hljs-string">"Unsupported type"</span> <span class="hljs-keyword">unless</span> isAcceptable(type)
 
     protoModel = type.prototype <span class="hljs-keyword">if</span> isModel(type)
@@ -333,37 +334,37 @@ resolved before attempting to use the data.</p>
 
     type.prototype.queryMucker?(query) <span class="hljs-keyword">if</span> isCollection(type)
 
-    query<span class="hljs-function">
+    query
 
-  <span class="hljs-title">addRelation</span> = <span class="hljs-params">(relation)</span> -&gt;</span>
+  <span class="hljs-function"><span class="hljs-title">addRelation</span> = <span class="hljs-params">(relation)</span> -&gt;</span>
     subQuery = getQueryFor(relation.type, relation.attribute)
-    _.extend(subQuery, _.pick(relation, validQueryOptions))<span class="hljs-function">
+    _.extend(subQuery, _.pick(relation, validQueryOptions))
 
-  <span class="hljs-title">safeConcat</span> = <span class="hljs-params">(set, newArray)</span> -&gt;</span>
+  <span class="hljs-function"><span class="hljs-title">safeConcat</span> = <span class="hljs-params">(set, newArray)</span> -&gt;</span>
       newArray = <span class="hljs-keyword">if</span> _.isString(newArray) <span class="hljs-keyword">then</span> [newArray] <span class="hljs-keyword">else</span> newArray
       set = set.concat(newArray) <span class="hljs-keyword">if</span> _.isArray(newArray) <span class="hljs-keyword">and</span> newArray.length &gt; <span class="hljs-number">0</span>
-      set<span class="hljs-function">
+      set
 
-  <span class="hljs-title">addSorts</span> = <span class="hljs-params">(sort, query)</span> -&gt;</span>
-    query.sort = sort <span class="hljs-keyword">if</span> sort?<span class="hljs-function">
+  <span class="hljs-function"><span class="hljs-title">addSorts</span> = <span class="hljs-params">(sort, query)</span> -&gt;</span>
+    query.sort = sort <span class="hljs-keyword">if</span> sort?
 
-  <span class="hljs-title">addFilterTokens</span> = <span class="hljs-params">(type, query)</span> -&gt;</span>
+  <span class="hljs-function"><span class="hljs-title">addFilterTokens</span> = <span class="hljs-params">(type, query)</span> -&gt;</span>
     filter = []
     filter = safeConcat(filter, <span class="hljs-attribute">type</span>::queryOptions?.filter)
     filter = safeConcat(filter, <span class="hljs-attribute">type</span>::<span class="hljs-attribute">model</span>::queryOptions?.filter) <span class="hljs-keyword">if</span> isCollection(type)
 
-    query.filter = filter <span class="hljs-keyword">if</span> filter.length &gt; <span class="hljs-number">0</span><span class="hljs-function">
+    query.filter = filter <span class="hljs-keyword">if</span> filter.length &gt; <span class="hljs-number">0</span>
 
-  <span class="hljs-title">addFindInTokens</span> = <span class="hljs-params">(type, query)</span> -&gt;</span>
+  <span class="hljs-function"><span class="hljs-title">addFindInTokens</span> = <span class="hljs-params">(type, query)</span> -&gt;</span>
     findIn = []
     findIn = safeConcat(findIn, <span class="hljs-attribute">type</span>::queryOptions?.findIn)
 
-    query.findIn = findIn <span class="hljs-keyword">if</span> findIn.length &gt; <span class="hljs-number">0</span><span class="hljs-function">
+    query.findIn = findIn <span class="hljs-keyword">if</span> findIn.length &gt; <span class="hljs-number">0</span>
 
-  <span class="hljs-title">addSelectTokens</span> = <span class="hljs-params">(schema, query)</span> -&gt;</span>
+  <span class="hljs-function"><span class="hljs-title">addSelectTokens</span> = <span class="hljs-params">(schema, query)</span> -&gt;</span>
     <span class="hljs-keyword">return</span> query.select = [schema] <span class="hljs-keyword">if</span> _.isString(schema)
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">unless</span> schema? <span class="hljs-keyword">and</span> schema.length &gt; <span class="hljs-number">0</span>
-    query.select = _(schema).map <span class="hljs-function"><span class="hljs-params">(item)</span> -&gt;</span>
+    query.select = _<span class="hljs-function"><span class="hljs-params">(schema)</span>.<span class="hljs-title">map</span> <span class="hljs-params">(item)</span> -&gt;</span>
       <span class="hljs-keyword">return</span> addRelation(item) <span class="hljs-keyword">if</span> item <span class="hljs-keyword">instanceof</span> Relation
       <span class="hljs-keyword">return</span> item.attribute <span class="hljs-keyword">if</span> item <span class="hljs-keyword">instanceof</span> Alias
       <span class="hljs-keyword">return</span> item <span class="hljs-keyword">if</span> _.isString(item)
@@ -415,41 +416,41 @@ resolved before attempting to use the data.</p>
     <span class="hljs-property">@queries</span>[index] = query
 
     <span class="hljs-property">@findOrCreateBatch</span>()
-      .<span class="hljs-keyword">then</span>(<span class="hljs-function"><span class="hljs-params">(results)</span> -&gt;</span> prepareResultFor(results[index], type))
+      .<span class="hljs-keyword">then</span><span class="hljs-function"><span class="hljs-params">((results) -&gt; prepareResultFor(results[index], type))</span>
 
-  <span class="hljs-attribute">exec</span>:<span class="hljs-function"> -&gt;</span>
+  <span class="hljs-title">exec</span>: -&gt;</span>
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">unless</span> <span class="hljs-property">@currentBatch</span>
 
     data = _(<span class="hljs-keyword">this</span>.queries)
-      .map(<span class="hljs-function"><span class="hljs-params">(q)</span> -&gt;</span> JSON.stringify(q))
-      .join(<span class="hljs-string">"\n---\n"</span>);
+      .map<span class="hljs-function"><span class="hljs-params">((q) -&gt; JSON.stringify(q))</span>
+      .<span class="hljs-title">join</span><span class="hljs-params">(<span class="hljs-string">"\n---\n"</span>)</span>;
 
-    <span class="hljs-property">@options</span>.fetch(<span class="hljs-property">@options</span>.url, data)
-      .done(<span class="hljs-property">@resolveBatch</span>)
+    @<span class="hljs-title">options</span>.<span class="hljs-title">fetch</span><span class="hljs-params">(<span class="hljs-property">@options</span>.url, data)</span>
+      .<span class="hljs-title">done</span><span class="hljs-params">(<span class="hljs-property">@resolveBatch</span>)</span>
 
-  <span class="hljs-attribute">resolveBatch</span>: <span class="hljs-function"><span class="hljs-params">(data)</span> =&gt;</span>
+  <span class="hljs-title">resolveBatch</span>: <span class="hljs-params">(data)</span> =&gt;</span>
     <span class="hljs-property">@currentBatch</span>.resolve(data)
     <span class="hljs-property">@clear</span>()
 
   <span class="hljs-attribute">clear</span>:<span class="hljs-function"> =&gt;</span>
     <span class="hljs-property">@queries</span> = []
-    <span class="hljs-property">@currentBatch</span> = <span class="hljs-literal">undefined</span><span class="hljs-function">
+    <span class="hljs-property">@currentBatch</span> = <span class="hljs-literal">undefined</span>
 
-  <span class="hljs-title">prepareResultFor</span> = <span class="hljs-params">(data, type)</span> -&gt;</span>
+  <span class="hljs-function"><span class="hljs-title">prepareResultFor</span> = <span class="hljs-params">(data, type)</span> -&gt;</span>
     rows = aliasRows(data, type)
     <span class="hljs-keyword">return</span> rows <span class="hljs-keyword">if</span> isCollection(type)
-    <span class="hljs-keyword">return</span> rows[<span class="hljs-number">0</span>] <span class="hljs-keyword">if</span> isModel(type)<span class="hljs-function">
+    <span class="hljs-keyword">return</span> rows[<span class="hljs-number">0</span>] <span class="hljs-keyword">if</span> isModel(type)
 
-  <span class="hljs-title">aliasRows</span> = <span class="hljs-params">(rows, type)</span> -&gt;</span>
+  <span class="hljs-function"><span class="hljs-title">aliasRows</span> = <span class="hljs-params">(rows, type)</span> -&gt;</span>
     schema = <span class="hljs-keyword">if</span> isModel(type)
     <span class="hljs-keyword">then</span> <span class="hljs-attribute">type</span>::queryOptions?.schema
     <span class="hljs-keyword">else</span> <span class="hljs-attribute">type</span>::<span class="hljs-attribute">model</span>::queryOptions?.schema
 
     schema = [schema] <span class="hljs-keyword">if</span> _.isString(schema)
 
-    _(rows).map <span class="hljs-function"><span class="hljs-params">(row)</span> -&gt;</span>
+    _<span class="hljs-function"><span class="hljs-params">(rows)</span>.<span class="hljs-title">map</span> <span class="hljs-params">(row)</span> -&gt;</span>
       transformedRow = { <span class="hljs-string">"_oid"</span>: row[<span class="hljs-string">"_oid"</span>] }
-      _(schema).each <span class="hljs-function"><span class="hljs-params">(item)</span> -&gt;</span>
+      _<span class="hljs-function"><span class="hljs-params">(schema)</span>.<span class="hljs-title">each</span> <span class="hljs-params">(item)</span> -&gt;</span>
         <span class="hljs-keyword">if</span>(_.isString(item))
           transformedRow[item] = row[item]
         <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(item <span class="hljs-keyword">instanceof</span> Alias)
@@ -476,12 +477,12 @@ resolved before attempting to use the data.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">V1</span>.<span class="hljs-title">Backbone</span>.<span class="hljs-title">RestPersister</span></span>
-  urlTmpl = _.template(<span class="hljs-string">"&lt;%= baseUrl %&gt;/&lt;%= assetType %&gt;&lt;% if(typeof(id) != \"undefined\") { %&gt;/&lt;%= id %&gt;&lt;% } %&gt;"</span>)<span class="hljs-function">
+  urlTmpl = _.template(<span class="hljs-string">"&lt;%= baseUrl %&gt;/&lt;%= assetType %&gt;&lt;% if(typeof(id) != \"undefined\") { %&gt;/&lt;%= id %&gt;&lt;% } %&gt;"</span>)
 
-  <span class="hljs-title">toAttribute</span> = <span class="hljs-params">(attribute, value)</span> -&gt;</span>
-    <span class="hljs-string">"&lt;Attribute name=\"<span class="hljs-subst">#{_.escape(attribute)}</span>\" act=\"set\"&gt;<span class="hljs-subst">#{_.escape(value)}</span>&lt;/Attribute&gt;"</span><span class="hljs-function">
+  <span class="hljs-function"><span class="hljs-title">toAttribute</span> = <span class="hljs-params">(attribute, value)</span> -&gt;</span>
+    <span class="hljs-string">"&lt;Attribute name=\"<span class="hljs-subst">#{_.escape(attribute)}</span>\" act=\"set\"&gt;<span class="hljs-subst">#{_.escape(value)}</span>&lt;/Attribute&gt;"</span>
 
-  <span class="hljs-title">toSingleRelation</span> = <span class="hljs-params">(attribute, oid)</span> -&gt;</span>
+  <span class="hljs-function"><span class="hljs-title">toSingleRelation</span> = <span class="hljs-params">(attribute, oid)</span> -&gt;</span>
     <span class="hljs-string">"&lt;Relation name=\"<span class="hljs-subst">#{_.escape(attribute)}</span>\" act=\"set\"&gt;&lt;Asset idref=\"<span class="hljs-subst">#{_.escape(oid)}</span>\" /&gt;&lt;/Relation&gt;"</span>
 
   defaultOptions =
@@ -512,16 +513,16 @@ resolved before attempting to use the data.</p>
 
   <span class="hljs-attribute">sendPatch</span>: <span class="hljs-function"><span class="hljs-params">(ctx, options)</span> -&gt;</span>
     schema = _.indexBy ctx.queryOptions.schema, <span class="hljs-function"><span class="hljs-params">(val)</span> -&gt;</span>
-      <span class="hljs-keyword">if</span> (val <span class="hljs-keyword">instanceof</span> Alias) <span class="hljs-keyword">then</span> val.alias <span class="hljs-keyword">else</span> val<span class="hljs-function">
+      <span class="hljs-keyword">if</span> (val <span class="hljs-keyword">instanceof</span> Alias) <span class="hljs-keyword">then</span> val.alias <span class="hljs-keyword">else</span> val
 
-    <span class="hljs-title">toXml</span> = <span class="hljs-params">(val, key)</span> -&gt;</span>
+    <span class="hljs-function"><span class="hljs-title">toXml</span> = <span class="hljs-params">(val, key)</span> -&gt;</span>
       item = schema[key] || key
       <span class="hljs-keyword">return</span> toSingleRelation(item.attribute, attr[item.alias].id) <span class="hljs-keyword">if</span> item <span class="hljs-keyword">instanceof</span> Relation <span class="hljs-keyword">and</span> item.isSingle() <span class="hljs-keyword">and</span> attr[item.alias]?
       <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> item <span class="hljs-keyword">instanceof</span> Relation
       <span class="hljs-keyword">return</span> toAttribute(item.attribute, val) <span class="hljs-keyword">if</span> item <span class="hljs-keyword">instanceof</span> Alias
       <span class="hljs-keyword">return</span> toAttribute(item, val) <span class="hljs-keyword">if</span> _.isString(item)
 
-    attrXml = _.map(ctx.changedAttributes(), toXml).join(<span class="hljs-string">""</span>)
+    attrXml = _.map(options.attrs, toXml).join(<span class="hljs-string">""</span>)
     asset = <span class="hljs-string">"&lt;Asset&gt;<span class="hljs-subst">#{attrXml}</span>&lt;/Asset&gt;"</span>
     url = <span class="hljs-property">@url</span>(ctx.queryOptions.assetType, ctx.id)
     <span class="hljs-property">@options</span>.post(url, asset)
@@ -529,9 +530,9 @@ resolved before attempting to use the data.</p>
   <span class="hljs-attribute">sendAll</span>: <span class="hljs-function"><span class="hljs-params">(ctx, options)</span> -&gt;</span>
     <span class="hljs-keyword">throw</span> <span class="hljs-string">"Unsupported context"</span> <span class="hljs-keyword">unless</span> isModel(ctx.constructor)
     options = options || {}
-    attr = options.attrs || ctx.toJSON(options)<span class="hljs-function">
+    attr = options.attrs || ctx.toJSON(options)
 
-    <span class="hljs-title">toXml</span> = <span class="hljs-params">(item)</span> -&gt;</span>
+    <span class="hljs-function"><span class="hljs-title">toXml</span> = <span class="hljs-params">(item)</span> -&gt;</span>
       <span class="hljs-keyword">return</span> toSingleRelation(item.attribute, attr[item.alias].id) <span class="hljs-keyword">if</span> item <span class="hljs-keyword">instanceof</span> Relation <span class="hljs-keyword">and</span> item.isSingle() <span class="hljs-keyword">and</span> attr[item.alias]?
       <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> item <span class="hljs-keyword">instanceof</span> Relation
       <span class="hljs-keyword">return</span> toAttribute(item.attribute, attr[item.alias]) <span class="hljs-keyword">if</span> item <span class="hljs-keyword">instanceof</span> Alias
@@ -542,7 +543,9 @@ resolved before attempting to use the data.</p>
     asset = <span class="hljs-string">"&lt;Asset&gt;<span class="hljs-subst">#{attrXml}</span>&lt;/Asset&gt;"</span>
     url = <span class="hljs-property">@url</span>(ctx.queryOptions.assetType, ctx.id)
     <span class="hljs-property">@options</span>.post(url, asset)
-      .done(<span class="hljs-function"><span class="hljs-params">(data)</span> -&gt;</span> ctx.id = result[<span class="hljs-number">1</span>] <span class="hljs-keyword">if</span> result = <span class="hljs-regexp">/id="(\w+:\d+):\d+"/</span>.exec(data))</pre></div></div>
+      .done<span class="hljs-function"><span class="hljs-params">((data) -&gt; ctx.id = result[<span class="hljs-number">1</span>] <span class="hljs-keyword">if</span> result = <span class="hljs-regexp">/id="(\w+:\d+):\d+"/</span>.exec(data))</span>
+
+</span></pre></div></div>
             
         </li>
         
@@ -557,23 +560,23 @@ resolved before attempting to use the data.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>aug = <span class="hljs-keyword">do</span> <span class="hljs-function">-&gt;</span><span class="hljs-function">
-  <span class="hljs-title">fn</span> = <span class="hljs-params">(target, action)</span> -&gt;</span><span class="hljs-function">
-    <span class="hljs-title">Dup</span> = -&gt;</span>
+            <div class="content"><div class='highlight'><pre>aug = <span class="hljs-keyword">do</span><span class="hljs-function"> -&gt;</span>
+  <span class="hljs-function"><span class="hljs-title">fn</span> = <span class="hljs-params">(target, action)</span> -&gt;</span>
+    <span class="hljs-function"><span class="hljs-title">Dup</span> = -&gt;</span>
     Dup.prototype = target
     _(<span class="hljs-keyword">new</span> Dup()).tap(action ||<span class="hljs-function"> -&gt;</span>)
 
-  _(fn).tap <span class="hljs-function"><span class="hljs-params">(fn)</span> -&gt;</span>
-    fn.e<span class="hljs-function"><span class="hljs-title">xtend</span> = <span class="hljs-params">(target, props)</span> -&gt;</span>
+  _<span class="hljs-function"><span class="hljs-params">(fn)</span>.<span class="hljs-title">tap</span> <span class="hljs-params">(fn)</span> -&gt;</span>
+    fn.<span class="hljs-function"><span class="hljs-title">extend</span> = <span class="hljs-params">(target, props)</span> -&gt;</span>
       aug target, <span class="hljs-function"><span class="hljs-params">(augmentedResult)</span> -&gt;</span> _.extend(augmentedResult, props)
 
-    fn.a<span class="hljs-function"><span class="hljs-title">dd</span> = <span class="hljs-params">(target, property, values)</span> -&gt;</span>
+    fn.<span class="hljs-function"><span class="hljs-title">add</span> = <span class="hljs-params">(target, property, values)</span> -&gt;</span>
       aug target, <span class="hljs-function"><span class="hljs-params">(augmentedResult)</span> -&gt;</span>
         augmentedResult[property] = <span class="hljs-keyword">if</span> _.isArray(target[property]) <span class="hljs-keyword">then</span> target[property].concat(values) <span class="hljs-keyword">else</span> values
 
-    fn.m<span class="hljs-function"><span class="hljs-title">erge</span> = <span class="hljs-params">(target, props)</span> -&gt;</span>
+    fn.<span class="hljs-function"><span class="hljs-title">merge</span> = <span class="hljs-params">(target, props)</span> -&gt;</span>
       aug target, <span class="hljs-function"><span class="hljs-params">(augmentedResult)</span> -&gt;</span>
-        _(props).each <span class="hljs-function"><span class="hljs-params">(val, key)</span> -&gt;</span> target[key] = _.extend(val, target[key])</pre></div></div>
+        _<span class="hljs-function"><span class="hljs-params">(props)</span>.<span class="hljs-title">each</span> <span class="hljs-params">(val, key)</span> -&gt;</span> target[key] = _.extend(val, target[key])</pre></div></div>
             
         </li>
         
@@ -608,7 +611,7 @@ resolved before attempting to use the data.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>V1.Backbone.a<span class="hljs-function"><span class="hljs-title">lias</span> = <span class="hljs-params">(attribute)</span> -&gt;</span> <span class="hljs-keyword">new</span> Alias(attribute)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>V1.Backbone.<span class="hljs-function"><span class="hljs-title">alias</span> = <span class="hljs-params">(attribute)</span> -&gt;</span> <span class="hljs-keyword">new</span> Alias(attribute)</pre></div></div>
             
         </li>
         
@@ -660,7 +663,7 @@ resolved before attempting to use the data.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>V1.Backbone.r<span class="hljs-function"><span class="hljs-title">elation</span> = <span class="hljs-params">(attribute)</span> -&gt;</span> <span class="hljs-keyword">new</span> Relation(attribute)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>V1.Backbone.<span class="hljs-function"><span class="hljs-title">relation</span> = <span class="hljs-params">(attribute)</span> -&gt;</span> <span class="hljs-keyword">new</span> Relation(attribute)</pre></div></div>
             
         </li>
         

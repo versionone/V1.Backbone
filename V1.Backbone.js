@@ -78,6 +78,7 @@
         read: readFromRetriever,
         create: syncToPersisterMethod("send"),
         update: syncToPersisterMethod("send"),
+        patch: syncToPersisterMethod("send"),
         "delete": syncToPersisterMethod("delete")
       };
     })();
@@ -462,7 +463,7 @@
           return toAttribute(item, val);
         }
       };
-      attrXml = _.map(ctx.changedAttributes(), toXml).join("");
+      attrXml = _.map(options.attrs, toXml).join("");
       asset = "<Asset>" + attrXml + "</Asset>";
       url = this.url(ctx.queryOptions.assetType, ctx.id);
       return this.options.post(url, asset);

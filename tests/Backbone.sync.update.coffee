@@ -48,7 +48,7 @@ describe "Updating model", ->
     Member = getModel(persister)
 
     model = new Member({_cid:"Member:1234", name:"Bobby", Nickname: "Bob"})
-    model.save({"name": "Robert"}, {patch: true}).done(done)
+    model.save({"name": "Robert"}, {patch: true, attrs: {"name": "Robert"}}).done(done)
 
   it "should send empty string properties on patch", (done) ->
     persister = createPersister (url, data) ->
@@ -56,7 +56,7 @@ describe "Updating model", ->
     Member = getModel(persister)
 
     model = new Member({_cid:"Member:1234", name:"Bobby", Nickname: "Bob", Email: "who@where.com"})
-    model.save({Email: ""}, {patch: true}).done(done)
+    model.save({Email: ""}, {patch: true, attrs: {Email: ""}}).done(done)
 
   it "should send empty string properties on save", (done) ->
     persister = createPersister (url, data) ->

@@ -74,6 +74,7 @@ method proxies most of its work into the configured `retriever` and
         read: readFromRetriever
         create: syncToPersisterMethod("send")
         update: syncToPersisterMethod("send")
+        patch: syncToPersisterMethod("send")
         delete: syncToPersisterMethod("delete")
 
 
@@ -357,7 +358,7 @@ Persistance
           return toAttribute(item.attribute, val) if item instanceof Alias
           return toAttribute(item, val) if _.isString(item)
 
-        attrXml = _.map(ctx.changedAttributes(), toXml).join("")
+        attrXml = _.map(options.attrs, toXml).join("")
         asset = "<Asset>#{attrXml}</Asset>"
         url = @url(ctx.queryOptions.assetType, ctx.id)
         @options.post(url, asset)
