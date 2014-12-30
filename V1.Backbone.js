@@ -137,7 +137,7 @@
   };
 
   V1.Backbone.JsonRetriever = (function() {
-    var addFilterTokens, addFindInTokens, addRelation, addSelectTokens, addSorts, aliasRows, defaultOptions, getQueryFor, prepareResultFor, safeConcat, validQueryOptions;
+    var addFilterTokens, addFindInTokens, addRelation, addSelectTokens, addSorts, addWithTokens, aliasRows, defaultOptions, getQueryFor, prepareResultFor, safeConcat, validQueryOptions;
 
     defaultOptions = {
       fetch: function() {
@@ -171,6 +171,7 @@
       }
       addSelectTokens(queryOptions.schema, query);
       addFilterTokens(type, query);
+      addWithTokens(type, query);
       addFindInTokens(type, query);
       if (isCollection(type)) {
         if (typeof (_base = type.prototype).queryMucker === "function") {
@@ -219,6 +220,12 @@
       if (findIn.length > 0) {
         return query.findIn = findIn;
       }
+    };
+
+    addWithTokens = function(type, query) {
+      var withToken, _ref;
+      withToken = (_ref = type.prototype.queryOptions) != null ? _ref["with"] : void 0;
+      return query["with"] != null ? query["with"] : query["with"] = withToken;
     };
 
     addSelectTokens = function(schema, query) {

@@ -175,6 +175,7 @@ Retrieval
         addSorts(type::queryOptions.sort, query) if isCollection(type) and type::queryOptions?
         addSelectTokens(queryOptions.schema, query)
         addFilterTokens(type, query)
+        addWithTokens(type, query)
         addFindInTokens(type, query)
 
         type.prototype.queryMucker?(query) if isCollection(type)
@@ -205,6 +206,10 @@ Retrieval
         findIn = safeConcat(findIn, type::queryOptions?.findIn)
 
         query.findIn = findIn if findIn.length > 0
+
+      addWithTokens = (type, query) ->
+        withToken = type::queryOptions?.with
+        query.with ?= withToken
 
       addSelectTokens = (schema, query) ->
         return query.select = [schema] if _.isString(schema)
