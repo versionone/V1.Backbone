@@ -13,7 +13,7 @@
     }
   ],
   "dependencies": {
-    "backbone": "*",
+    "backbone": "<1.2.2",
     "underscore": "*"
   },
   "devDependencies": {
