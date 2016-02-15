@@ -9,8 +9,8 @@ Base Setup
 Establish and import some required global objects.
 
     V1 = if exports? then exports else this.V1 or (this.V1 = {})
-    _ = if !this?._? then (if require? then require('underscore') else throw "Unable to load/find underscore") else this._
-    Backbone = if !this?.Backbone? then (if require? then require('backbone') else throw "Unable to load/find backbone") else this.Backbone
+    _ = if !this?._? then (if require? then require('underscore') else throw new Error("Unable to load/find underscore")) else this._
+    Backbone = if !this?.Backbone? then (if require? then require('backbone') else throw new Error("Unable to load/find backbone")) else this.Backbone
 
 Create a `property` helper bound to a specified property.
 
@@ -34,7 +34,7 @@ underlying default value.
       _(getter).tap (getter) ->
         getter.safe = () ->
           val = getter.apply(this, arguments)
-          throw "A "+property+" is required" unless val?
+          throw new Error("A "+property+" is required") unless val?
           val
 
         getter.set = (val) -> defaultValue = val
@@ -78,7 +78,7 @@ method proxies most of its work into the configured `retriever` and
 
 
       (method, model, options) ->
-        throw "Unsupported sync method: \"#{method}\"" unless methods[method]
+        throw new Error("Unsupported sync method: \"#{method}\"") unless methods[method]
         methods[method].call(this, model, options)
 
 Helpers
@@ -161,7 +161,7 @@ Retrieval
       validQueryOptions = ["find", "filter", "where", "with"]
 
       getQueryFor = (type, attribute) ->
-        throw "Unsupported type" unless isAcceptable(type)
+        throw new Error("Unsupported type") unless isAcceptable(type)
 
         protoModel = type.prototype if isModel(type)
         protoModel = type::model.prototype if isCollection(type)
@@ -220,7 +220,7 @@ Retrieval
           return item if _.isString(item)
 
       constructor: (options) ->
-        throw "url required" unless options?.url?
+        throw new Error("url required") unless options?.url?
 
         @options = _.extend({}, defaultOptions, options)
 
@@ -243,7 +243,7 @@ Retrieval
         instance.queryMucker?(query) if instance.queryMucker? and instance.queryMucker != type.prototype.queryMucker
 
         if isModel(type)
-          throw "`id` is required" unless instance.id
+          throw new Error("`id` is required") unless instance.id
           query.where = _.extend(query.where or {}, ID: instance.id)
 
         return @batchInto(type, query, @queries.length) if @options.batch
@@ -338,11 +338,11 @@ Persistance
         urlTmpl({baseUrl: @options.url, assetType: oidParts[0] or assetType, id: oidParts[1]})
 
       constructor: (options) ->
-        throw "url required" unless options?.url?
+        throw new Error("url required") unless options?.url?
         @options = _.extend({}, defaultOptions, options)
 
       delete: (ctx, options) ->
-        throw "Unsupported context" unless isModel(ctx.constructor)
+        throw new Error("Unsupported context") unless isModel(ctx.constructor)
         options = options || {}
         attr = options.attrs || ctx.toJSON(options)
         @options.post(@url(ctx.queryOptions.assetType, ctx.id)+"?op=Delete")
@@ -368,7 +368,7 @@ Persistance
         @options.post(url, asset)
 
       sendAll: (ctx, options) ->
-        throw "Unsupported context" unless isModel(ctx.constructor)
+        throw new Error("Unsupported context") unless isModel(ctx.constructor)
         options = options || {}
         attr = options.attrs || ctx.toJSON(options)
 
@@ -435,7 +435,7 @@ Relation Helper
         isModel(@type)
 
       of: (type) ->
-        throw "Unsupported type must be a V1.Backbone.Model or a V1.Backbone.Collection" unless isAcceptable(type)
+        throw new Error("Unsupported type must be a V1.Backbone.Model or a V1.Backbone.Collection") unless isAcceptable(type)
         aug.extend(this, {type})
 
       addFilter: (filters...) ->

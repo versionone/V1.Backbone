@@ -11,7 +11,7 @@
     if (typeof require !== "undefined" && require !== null) {
       return require('underscore');
     } else {
-      throw "Unable to load/find underscore";
+      throw new Error("Unable to load/find underscore");
     }
   })()) : this._;
 
@@ -19,7 +19,7 @@
     if (typeof require !== "undefined" && require !== null) {
       return require('backbone');
     } else {
-      throw "Unable to load/find backbone";
+      throw new Error("Unable to load/find backbone");
     }
   })()) : this.Backbone;
 
@@ -40,7 +40,7 @@
         var val;
         val = getter.apply(this, arguments);
         if (val == null) {
-          throw "A " + property + " is required";
+          throw new Error("A " + property + " is required");
         }
         return val;
       };
@@ -83,7 +83,7 @@
     })();
     return function(method, model, options) {
       if (!methods[method]) {
-        throw "Unsupported sync method: \"" + method + "\"";
+        throw new Error("Unsupported sync method: \"" + method + "\"");
       }
       return methods[method].call(this, model, options);
     };
@@ -153,7 +153,7 @@
     getQueryFor = function(type, attribute) {
       var assetType, protoModel, query, queryOptions, _base;
       if (!isAcceptable(type)) {
-        throw "Unsupported type";
+        throw new Error("Unsupported type");
       }
       if (isModel(type)) {
         protoModel = type.prototype;
@@ -252,7 +252,7 @@
       this.clear = __bind(this.clear, this);
       this.resolveBatch = __bind(this.resolveBatch, this);
       if ((options != null ? options.url : void 0) == null) {
-        throw "url required";
+        throw new Error("url required");
       }
       this.options = _.extend({}, defaultOptions, options);
       this.clear();
@@ -283,7 +283,7 @@
       }
       if (isModel(type)) {
         if (!instance.id) {
-          throw "`id` is required";
+          throw new Error("`id` is required");
         }
         query.where = _.extend(query.where || {}, {
           ID: instance.id
@@ -423,7 +423,7 @@
     function RestPersister(options) {
       this.url = __bind(this.url, this);
       if ((options != null ? options.url : void 0) == null) {
-        throw "url required";
+        throw new Error("url required");
       }
       this.options = _.extend({}, defaultOptions, options);
     }
@@ -431,7 +431,7 @@
     RestPersister.prototype["delete"] = function(ctx, options) {
       var attr;
       if (!isModel(ctx.constructor)) {
-        throw "Unsupported context";
+        throw new Error("Unsupported context");
       }
       options = options || {};
       attr = options.attrs || ctx.toJSON(options);
@@ -478,7 +478,7 @@
     RestPersister.prototype.sendAll = function(ctx, options) {
       var asset, attr, attrXml, toXml, url;
       if (!isModel(ctx.constructor)) {
-        throw "Unsupported context";
+        throw new Error("Unsupported context");
       }
       options = options || {};
       attr = options.attrs || ctx.toJSON(options);
@@ -579,7 +579,7 @@
 
     Relation.prototype.of = function(type) {
       if (!isAcceptable(type)) {
-        throw "Unsupported type must be a V1.Backbone.Model or a V1.Backbone.Collection";
+        throw new Error("Unsupported type must be a V1.Backbone.Model or a V1.Backbone.Collection");
       }
       return aug.extend(this, {
         type: type
