@@ -7,6 +7,7 @@ Backbone = require('backbone')
 recorded = require('./recorded')
 spy = require('sinon').spy
 deferred = require('JQDeferred')
+inputCollection = null
 
 describe 'V1.Backbone.JsonRetriever', ->
 
@@ -19,6 +20,50 @@ describe 'V1.Backbone.JsonRetriever', ->
     it 'does not throw an error when a url is provided', ->
       createWithoutUrl = -> new JsonRetriever(url:"/VersionOne.Web/query.legacy.v1")
       expect(createWithoutUrl).not.to.throw(/url required/)
+
+  describe 'given a collection with a queryMucker function on the collection\'s prototype', ->
+    beforeEach () ->
+        @queryMuckerSpy = spy()
+        inputCollection = V1.Backbone.Collection.extend
+            model: V1.Backbone.Model.extend
+                queryOptions:
+                    assetType: "Member"
+        inputCollection.prototype.queryMucker = @queryMuckerSpy
+        @url = "/VersionOne.Web/query.legacy.v1"
+        @fetcherSpy = spy () ->
+            deferred()
+
+
+    describe 'when executing the query', ->
+        beforeEach () ->
+            @sut = new JsonRetriever(url: @url, fetch: @fetcherSpy, defer: deferred)
+            @sut.for(inputCollection)
+            @sut.exec()
+
+        it 'should call the collection\'s prototype queryMucker function', ->
+            expect(@queryMuckerSpy.called).to.be.true
+
+  describe 'given a collection with a queryMucker function on the collection\'s instance', ->
+    beforeEach () ->
+        @queryMuckerSpy = spy()
+        inputCollection = V1.Backbone.Collection.extend
+            model: V1.Backbone.Model.extend
+                queryOptions:
+                    assetType: "Member"
+            queryMucker: @queryMuckerSpy
+        @url = "/VersionOne.Web/query.legacy.v1"
+        @fetcherSpy = spy () ->
+            deferred()
+
+
+    describe 'when executing the query', ->
+        beforeEach () ->
+            @sut = new JsonRetriever(url: @url, fetch: @fetcherSpy, defer: deferred)
+            @sut.for(inputCollection)
+            @sut.exec()
+
+        it 'should call the collection\'s instance queryMucker function', ->
+            expect(@queryMuckerSpy.called).to.be.true
 
   describe 'executing a query', ->
 

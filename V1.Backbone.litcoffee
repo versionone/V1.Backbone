@@ -178,7 +178,7 @@ Retrieval
         addWithTokens(type, query)
         addFindInTokens(type, query)
 
-        type.prototype.queryMucker?(query) if isCollection(type)
+        type.queryMucker?(query) if isCollection(type)
 
         query
 

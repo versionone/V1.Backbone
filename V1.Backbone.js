@@ -151,7 +151,7 @@
     validQueryOptions = ["find", "filter", "where", "with"];
 
     getQueryFor = function(type, attribute) {
-      var assetType, protoModel, query, queryOptions, _base;
+      var assetType, protoModel, query, queryOptions;
       if (!isAcceptable(type)) {
         throw new Error("Unsupported type");
       }
@@ -174,8 +174,8 @@
       addWithTokens(type, query);
       addFindInTokens(type, query);
       if (isCollection(type)) {
-        if (typeof (_base = type.prototype).queryMucker === "function") {
-          _base.queryMucker(query);
+        if (typeof type.queryMucker === "function") {
+          type.queryMucker(query);
         }
       }
       return query;
