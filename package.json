@@ -11,7 +11,8 @@
     "preparepublish": "npm test && npm run build:dist && npm run docs",
     "test": "node_modules/.bin/grunt mochaTest",
     "build": "node_modules/.bin/grunt coffee:compile",
-    "build:dist": "npm run build && node_modules/.bin/grunt uglify",
+    "uglify": "node_modules/.bin/grunt uglify",
+    "build:dist": "npm run build && npm run uglify",
     "docs": "node_modules/.bin/grunt docco"
   },
   "contributors": [
