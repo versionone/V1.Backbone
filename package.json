@@ -6,10 +6,22 @@
     "type": "git",
     "url": "https://github.com/versionone/V1.Backbone.git"
   },
+  "scripts": {
+    "preversion": "npm run preparepublish",
+    "preparepublish": "npm test && npm run build:dist && npm run docs",
+    "test": "node_modules/.bin/grunt mochaTest",
+    "build": "node_modules/.bin/grunt coffee:compile",
+    "build:dist": "npm run build && node_modules/.bin/grunt uglify",
+    "docs": "node_modules/.bin/grunt docco"
+  },
   "contributors": [
     {
       "name": "James Holmes",
       "email": "james.holmes@versionone.com"
+    },
+    {
+      "name": "Andrew Smith",
+      "email": "andrew@WeAreSoftwareCraftsmen.com"
     }
   ],
   "dependencies": {
@@ -21,6 +33,7 @@
     "chai": "*",
     "coffee-script": "~1.7.1",
     "grunt": "~0.4.2",
+    "grunt-cli": "^1.1.0",
     "grunt-contrib-coffee": "~0.10.0",
     "grunt-contrib-uglify": "~0.3.2",
     "grunt-contrib-watch": "~0.5.3",
